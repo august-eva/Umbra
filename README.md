@@ -1,10 +1,11 @@
 # 🌒 Umbra (Эстетичный дневник / Aesthetic Diary)
 
 **🌐 Выберите язык описания / Choose description language / Elige el idioma:**
-[🇷🇺 Русский](#русский) | [🇬🇧 English](#english) | [🇪🇸 Español](#español)
+[🇷🇺 Русский](#russian) | [🇬🇧 English](#english) | [🇪🇸 Español](#spanish)
 
 ---
 
+<a id="russian"></a>
 ## 🇷🇺 Русский
 
 > **Umbra** — это десктопное приложение для ведения личного дневника и трекинга целей в эстетике *Dark Academia*. 
@@ -51,6 +52,8 @@
 
 ---
 
+<a id="english"></a>
+
 🇬🇧 English
 
 Umbra is a desktop application for keeping a personal diary and goal tracking with a Dark Academia aesthetic. 
@@ -96,6 +99,8 @@ Before running the app for the first time, you must set up a virtual environment
    ```
 
 ---
+
+<a id="spanish"></a>
 
 🇪🇸 Español
 
