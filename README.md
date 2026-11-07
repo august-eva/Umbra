@@ -1,4 +1,3 @@
-```markdown
 # 🌒 Umbra (Эстетичный дневник / Aesthetic Diary)
 
 **🌐 Выберите язык описания / Choose description language / Elige el idioma:**
@@ -145,5 +144,3 @@ Antes de ejecutar la aplicación por primera vez, debe configurar un entorno vir
 ---
 
 Автор / Author: Ева Август (Eva August)
-
-```
