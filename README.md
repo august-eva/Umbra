@@ -1,7 +1,7 @@
 # 🌒 Umbra (Эстетичный дневник / Aesthetic Diary)
 
 **🌐 Выберите язык описания / Choose description language / Elige el idioma:**
-[🇷🇺 Русский](#-русский) | [🇬🇧 English](#-english) | [🇪🇸 Español](#-español)
+[🇷🇺 Русский](#русский) | [🇬🇧 English](#english) | [🇪🇸 Español](#español)
 
 ---
 
