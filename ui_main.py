@@ -1,11 +1,7 @@
 import sys
 from PyQt6.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QWidget,
-    QVBoxLayout,
-    QLabel,
-    QPushButton
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel,
+    QPushButton, QStackedWidget, QTextEdit, QComboBox, QHBoxLayout, QMessageBox
 )
 from PyQt6.QtCore import Qt
 
@@ -13,50 +9,109 @@ from PyQt6.QtCore import Qt
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
         self.setWindowTitle("Umbra")
         self.resize(800, 600)
 
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        self.stack = QStackedWidget()
+        self.setCentralWidget(self.stack)
 
+        self.menu_screen = QWidget()
+        self.diary_screen = QWidget()
+        self.goals_screen = QWidget()
+        self.settings_screen = QWidget()
+
+        self.stack.addWidget(self.menu_screen)
+        self.stack.addWidget(self.diary_screen)
+        self.stack.addWidget(self.goals_screen)
+        self.stack.addWidget(self.settings_screen)
+
+        self.setup_menu_screen()
+        self.setup_diary_screen()
+        self.setup_goals_screen()
+        self.setup_settings_screen()
+
+# Главное меню
+    def setup_menu_screen(self):
         layout = QVBoxLayout()
-
-        layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-        layout.setContentsMargins(40, 40, 40, 40)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.setSpacing(20)
 
-        central_widget.setLayout(layout)
+        title = QLabel("Добро пожаловать в Umbra 🌒")
+        title.setStyleSheet(
+            "font-size: 28px; font-weight: bold; margin-bottom: 30px;")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title)
 
-        welcome_label = QLabel("Добро пожаловать")
-        welcome_label.setStyleSheet("font-size: 24px; font-weight: bold;")
+        btn_diary = QPushButton("📖 Мой дневник")
+        btn_goals = QPushButton("🎯 Мои цели")
+        btn_settings = QPushButton("⚙️ Настройки")
 
-        diary_button = QPushButton("Мой дневник")
-        goals_button = QPushButton("Мои цели")
-        settings_button = QPushButton("Настройки")
+        for btn in [btn_diary, btn_goals, btn_settings]:
+            btn.setFixedSize(250, 50)
 
-        for button in [diary_button, goals_button, settings_button]:
-            button.setFixedHeight(45)
-            button.setSizePolicy(
-                button.sizePolicy().horizontalPolicy(),
-                button.sizePolicy().verticalPolicy().Preferred
-            )
+        layout.addWidget(btn_diary, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(btn_goals, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(btn_settings, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        layout.addWidget(welcome_label)
-        layout.addWidget(diary_button)
-        layout.addWidget(goals_button)
-        layout.addWidget(settings_button)
+        self.menu_screen.setLayout(layout)
 
-
-def main():
-    app = QApplication(sys.argv)
-
-    window = MainWindow()
-
-    window.show()
-
-    sys.exit(app.exec())
+        btn_diary.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        btn_goals.clicked.connect(lambda: self.stack.setCurrentIndex(2))
+        btn_settings.clicked.connect(lambda: self.stack.setCurrentIndex(3))
 
 
-if __name__ == "__main__":
-    main()
+# Дневник
+
+    def setup_diary_screen(self):
+        layout = QVBoxLayout()
+
+        btn_back = QPushButton("← Назад в меню")
+        btn_back.setFixedWidth(150)
+        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        layout.addWidget(btn_back)
+
+        self.text_edit = QTextEdit()
+        self.text_edit.setPlaceholderText("Напиши свои мысли здесь...")
+        layout.addWidget(self.text_edit)
+
+        btn_save = QPushButton("💾 Сохранить")
+        layout.addWidget(btn_save)
+
+        self.diary_screen.setLayout(layout)
+
+# Цели
+    def setup_goals_screen(self):
+        layout = QVBoxLayout()
+
+        btn_back = QPushButton("← Назад в меню")
+        btn_back.setFixedWidth(150)
+        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        layout.addWidget(btn_back)
+
+        layout.addWidget(QLabel("🎯 Здесь будут ваши цели и дедлайны."))
+
+        self.goals_screen.setLayout(layout)
+
+# Настройки
+    def setup_settings_screen(self):
+        layout = QVBoxLayout()
+
+        btn_back = QPushButton("← Назад в меню")
+        btn_back.setFixedWidth(150)
+        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        layout.addWidget(btn_back)
+
+        layout.addWidget(
+            QLabel("⚙️ Здесь будут настройки тем и экспорт данных."))
+
+        self.settings_screen.setLayout(layout)
+
+    def closeEvent(self, event):
+        reply = QMessageBox.question(
+            self, 'Выход', 'Вы уверены, что хотите закрыть Umbra?',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            event.accept()
+        else:
+            event.ignore()
