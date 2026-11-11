@@ -6,6 +6,7 @@ class DatabaseManager:
     def __init__(self, db_name="umbra.db"):
         self.connection = sqlite3.connect(db_name)
         self.cursor = self.connection.cursor()
+        self.create_tables()
         print(f"Подключение к базе данных '{db_name}' установлено.")
 
     def create_tables(self):
@@ -44,6 +45,25 @@ class DatabaseManager:
             self.connection.rollback()
             print(f"Произошла ошибка при создании таблиц: {e}")
 
+    def add_goal(self, text, deadline):
+        try:
+            self.cursor.execute(
+                "INSERT INTO goals (text, deadline) VALUES (?, ?)", (text, deadline))
+            self.connection.commit()
+            return True
+        except sqlite3.Error as e:
+            self.connection.rollback()
+            print(f"Ошибка при добавлении цели: {e}")
+            return False
+
+    def get_goals(self):
+        try:
+            self.cursor.execute("SELECT id, text, deadline FROM goals")
+            return self.cursor.fetchall()
+        except sqlite3.Error as e:
+            print(f"Ошибка при получении цели: {e}")
+            return []
+
     def close(self):
         if self.connection:
             self.connection.close()
@@ -57,8 +77,8 @@ if __name__ == "__main__":
 
     try:
         db_manager.cursor.execute(
-            "INSERT INTO notes (text, mood) VALUES (?, ?)",
-            ("Изучить документацию sqlite3", "продуктивное")
+            "INSERT INTO notes (title, text, mood) VALUES (?, ?, ?)",
+            ("Моя первая запись", "Изучить документацию sqlite3", "продуктивное")
         )
 
         future_date = (datetime.now() + timedelta(days=365)

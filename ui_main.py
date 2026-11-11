@@ -2,9 +2,9 @@ import sys
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel,
     QPushButton, QStackedWidget, QTextEdit, QComboBox, QHBoxLayout, QMessageBox,
-    QListWidget, QLineEdit
+    QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QDate
 from database import DatabaseManager
 
 
@@ -35,6 +35,7 @@ class MainWindow(QMainWindow):
 
         self.setup_settings_screen()
         self.load_notes()
+        self.load_goals()
 
 # Главное меню
     def setup_menu_screen(self):
@@ -112,7 +113,28 @@ class MainWindow(QMainWindow):
         btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         layout.addWidget(btn_back)
 
-        layout.addWidget(QLabel("🎯 Здесь будут ваши цели и дедлайны."))
+        self.goal_input = QLineEdit()
+        self.goal_input.setPlaceholderText("Введите название цели...")
+        layout.addWidget(self.goal_input)
+
+        goal_controls = QHBoxLayout()
+
+        self.goal_date = QDateEdit()
+        self.goal_date.setCalendarPopup(True)
+        self.goal_date.setDate(QDate.currentDate())
+        goal_controls.addWidget(self.goal_date)
+
+        btn_add_goal = QPushButton("🖋 Добавить цель")
+        btn_add_goal.clicked.connect(self.save_goal)
+        goal_controls.addWidget(btn_add_goal)
+
+        layout.addLayout(goal_controls)
+
+        self.goals_table = QTableWidget()
+        self.goals_table.setColumnCount(3)
+        self.goals_table.setHorizontalHeaderLabels(["ID", "Цель", "Дедлайн"])
+        self.goals_table.setColumnHidden(0, True)
+        layout.addWidget(self.goals_table)
 
         self.goals_screen.setLayout(layout)
 
@@ -166,6 +188,55 @@ class MainWindow(QMainWindow):
 
             display_text = f"✍ {title} | {mood}\n{text_preview}"
             self.notes_list.addItem(display_text)
+
+    def save_goal(self):
+        text = self.goal_input.text().strip()
+        deadline = self.goal_date.date().toString("yyyy-MM-dd")
+        if not text:
+            QMessageBox.warning(self, "Ошибка ввода",
+                                "Пожалйста, введите название цели!")
+            return
+
+        if len(text) > 100:
+            QMessageBox.warning(
+                self, "Ошибка", "Название цели слишком длинное (макс. 100 символов)!")
+            return
+
+        is_saved = self.db.add_goal(text, deadline)
+
+        if is_saved:
+            self.goal_input.clear()
+            self.load_goals()
+            QMessageBox.information(
+                self, "Успех", "Новая цель успешно добавлена в трекер!")
+        else:
+            QMessageBox.critical(
+                self, "Ошибка БД", "Не удалось сохранить цель. Проверьте поделючение к базе.")
+
+    def load_goals(self):
+        self.goals_table.setRowCount(0)
+
+        goals = self.db.get_goals()
+
+        self.goals_table.setEditTriggers(
+            QTableWidget.EditTrigger.NoEditTriggers)
+        self.goals_table.horizontalHeader().setStretchLastSection(True)
+        self.goals_table.setColumnWidth(1, 250)
+
+        for row_number, goal in enumerate(goals):
+            self.goals_table.insertRow(row_number)
+
+            goal_id = str(goal[0])
+            goal_text = goal[1]
+            goal_deadline = goal[2]
+
+            id_item = QTableWidgetItem(goal_id)
+            text_item = QTableWidgetItem(goal_text)
+            deadline_item = QTableWidgetItem(goal_deadline)
+
+            self.goals_table.setItem(row_number, 0, id_item)
+            self.goals_table.setItem(row_number, 1, text_item)
+            self.goals_table.setItem(row_number, 2, deadline_item)
 
     def closeEvent(self, event):
         reply = QMessageBox.question(
