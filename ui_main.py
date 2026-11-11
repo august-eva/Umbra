@@ -1,9 +1,11 @@
 import sys
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel,
-    QPushButton, QStackedWidget, QTextEdit, QComboBox, QHBoxLayout, QMessageBox
+    QPushButton, QStackedWidget, QTextEdit, QComboBox, QHBoxLayout, QMessageBox,
+    QListWidget, QLineEdit
 )
 from PyQt6.QtCore import Qt
+from database import DatabaseManager
 
 
 class MainWindow(QMainWindow):
@@ -11,6 +13,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Umbra")
         self.resize(800, 600)
+        self.db = DatabaseManager()
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -29,6 +32,9 @@ class MainWindow(QMainWindow):
         self.setup_diary_screen()
         self.setup_goals_screen()
         self.setup_settings_screen()
+
+        self.setup_settings_screen()
+        self.load_notes()
 
 # Главное меню
     def setup_menu_screen(self):
@@ -70,12 +76,30 @@ class MainWindow(QMainWindow):
         btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         layout.addWidget(btn_back)
 
+        self.title_input = QLineEdit()
+        self.title_input.setPlaceholderText(
+            "Название записи (например,  'Мой день')...")
+        layout.addWidget(self.title_input)
+
+        mood_layout = QHBoxLayout()
+        mood_layout.addWidget(QLabel("Настроение:"))
+
+        self.mood_combo = QComboBox()
+        self.mood_combo.addItems(
+            ["Радость", "Грусть", "Вдохновение", "Злость"])
+        mood_layout.addWidget(self.mood_combo)
+
+        layout.addLayout(mood_layout)
+
         self.text_edit = QTextEdit()
         self.text_edit.setPlaceholderText("Напиши свои мысли здесь...")
         layout.addWidget(self.text_edit)
 
         btn_save = QPushButton("💾 Сохранить")
+        btn_save.clicked.connect(self.save_note)
         layout.addWidget(btn_save)
+        self.notes_list = QListWidget()
+        layout.addWidget(self.notes_list)
 
         self.diary_screen.setLayout(layout)
 
@@ -105,6 +129,43 @@ class MainWindow(QMainWindow):
             QLabel("⚙️ Здесь будут настройки тем и экспорт данных."))
 
         self.settings_screen.setLayout(layout)
+
+    def save_note(self):
+        title = self.title_input.text().strip()
+        text = self.text_edit.toPlainText().strip()
+        mood = self.mood_combo.currentText()
+
+        if not title or not text:
+            QMessageBox.warning(
+                self, "Ошибка", "Пожалуйста, заполни название и текст записи!")
+            return
+
+        self.db.cursor.execute(
+            "INSERT INTO notes (title, text, mood) VALUES (?, ?, ?)",
+            (title, text, mood)
+        )
+        self.db.connection.commit()
+
+        self.title_input.clear()
+        self.text_edit.clear()
+        self.load_notes()
+        QMessageBox.information(self, "Успех", "Запись сохранена в дневник!")
+
+    def load_notes(self):
+        self.notes_list.clear()
+
+        notes = self.db.cursor.execute(
+            "SELECT * FROM notes ORDER BY id DESC").fetchall()
+
+        for note in notes:
+            title = note[1]
+            text = note[2]
+            mood = note[3]
+
+            text_preview = text[:30] + "..." if len(text) > 30 else text
+
+            display_text = f"✍ {title} | {mood}\n{text_preview}"
+            self.notes_list.addItem(display_text)
 
     def closeEvent(self, event):
         reply = QMessageBox.question(

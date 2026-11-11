@@ -12,6 +12,7 @@ class DatabaseManager:
         create_notes_query = """
         CREATE TABLE IF NOT EXISTS notes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
             text TEXT NOT NULL,
             mood TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
