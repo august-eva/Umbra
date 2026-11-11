@@ -2,9 +2,9 @@ import sys
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel,
     QPushButton, QStackedWidget, QTextEdit, QComboBox, QHBoxLayout, QMessageBox,
-    QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem
+    QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem, QFileDialog
 )
-from PyQt6.QtCore import Qt, QDate
+from PyQt6.QtCore import Qt, QDate, QSettings
 from database import DatabaseManager
 
 
@@ -14,6 +14,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Umbra")
         self.resize(800, 600)
         self.db = DatabaseManager()
+
+        self.settings = QSettings("UmbraDev", "UmbraApp")
+
+        saved_index = int(self.settings.value("theme_index", 0))
+
+        self.apply_theme(saved_index)
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -68,6 +74,7 @@ class MainWindow(QMainWindow):
 
 
 # Дневник
+
 
     def setup_diary_screen(self):
         layout = QVBoxLayout()
@@ -147,9 +154,33 @@ class MainWindow(QMainWindow):
         btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         layout.addWidget(btn_back)
 
-        layout.addWidget(
-            QLabel("⚙️ Здесь будут настройки тем и экспорт данных."))
+        layout.addWidget(QLabel("<b>Сохранение данных:</b>"))
+        self.btn_export = QPushButton("📨Экспорт дневника в TXT")
+        self.btn_export.setFixedHeight(40)
+        self.btn_export.clicked.connect(self.export_to_txt)
+        layout.addWidget(self.btn_export)
 
+        layout.addSpacing(20)
+        layout.addWidget(QLabel("<b>Внешний вид и язык:</b>"))
+
+        self.lang_combo = QComboBox()
+        self.lang_combo.addItems(["Русский", "English", "Espanol"])
+        layout.addWidget(QLabel("Язык интерфейса:"))
+        layout.addWidget(self.lang_combo)
+
+        self.theme_combo = QComboBox()
+        self, self.theme_combo.addItems(
+            ["Темная тема", "Светлая тема", "Красная тема", "Синяя тема", "Розовая тема", "Коричневая тема"])
+        self.theme_combo.currentIndexChanged.connect(self.change_theme)
+        layout.addWidget(QLabel("Тема офрмления:"))
+        layout.addWidget(self.theme_combo)
+
+        layout.addSpacing(20)
+        self.btn_about = QPushButton("🚨О программе")
+        self.btn_about.clicked.connect(self.show_about)
+        layout.addWidget(self.btn_about)
+
+        layout.addStretch()
         self.settings_screen.setLayout(layout)
 
     def save_note(self):
@@ -237,6 +268,58 @@ class MainWindow(QMainWindow):
             self.goals_table.setItem(row_number, 0, id_item)
             self.goals_table.setItem(row_number, 1, text_item)
             self.goals_table.setItem(row_number, 2, deadline_item)
+
+    def export_to_txt(self):
+        notes = self.db.get_notes()
+        if not notes:
+            QMessageBox.warning(self, "Ошибка", "Дневник пуст!")
+            return
+
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Сохранить дневник", "my_diary.txt", "(*.txt)")
+        if file_path:
+            try:
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    for note in notes:
+                        file.write(
+                            f"Дата: {note[4]}\nЗаголовок: {note[1]}\nНастроение: {note[3]}\nТекст: {note[2]}\n")
+                        file.write("-" * 40 + "\n\n")
+                QMessageBox.information(
+                    self, "Успех", "Дневник сохаренен в TXT!")
+            except Exception as e:
+                QMessageBox.critical(
+                    self, "Ошибка", f"Не удалось сохранить: {e}")
+
+    def show_about(self):
+        QMessageBox.about(self, "О программе Umbra",
+                          "☯ Umbra (Эстетичный дневник)\n\n"
+                          "Версия: 1.0\n"
+                          "Автор: Eva August\n\n"
+                          "Технологии: Python, PyQt6, SQLite3.")
+
+    def apply_theme(self, theme_index):
+        if theme_index == 0:
+            self.setStyleSheet("background-color: #2b2b2b; color: white;")
+
+        elif theme_index == 1:
+            self.setStyleSheet("background-color: #f0f0f0; color: black;")
+
+        elif theme_index == 2:
+            self.setStyleSheet("background-color: #4a1515; color: #ffcccc;")
+
+        elif theme_index == 3:
+            self.setStyleSheet("background-color: #1a2a40; color: #d0e0f0;")
+
+        elif theme_index == 4:
+            self.setStyleSheet("background-color: #f4e1e1; color: #4a2c2c;")
+
+        elif theme_index == 5:
+            self.setStyleSheet("background-color: #3e2a20; color: #f0e6d2;")
+
+        self.settings.setValue("theme_index", theme_index)
+
+    def change_theme(self, index):
+        self.apply_theme(index)
 
     def closeEvent(self, event):
         reply = QMessageBox.question(
