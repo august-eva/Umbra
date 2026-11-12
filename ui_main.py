@@ -49,6 +49,31 @@ class MainWindow(QMainWindow):
         self.theme_combo.setCurrentIndex(int(saved_theme))
         self.change_theme(int(saved_theme))
 
+        self.menu_screen.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.menu_screen.setStyleSheet("""
+            QWidget {
+                background-image: url(resources/bg_menu.png);
+                background-position: center;
+                }
+        """)
+
+        screens_with_smoke = [
+            self.diary_list_screen,
+            self.diary_edit_screen,
+            self.goals_screen,
+            self.settings_screen
+        ]
+
+        for screen in screens_with_smoke:
+            screen.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+            screen.setStyleSheet("""
+            QWidget {
+                background-image: url(resources/bg_smoke.png);
+                background-position: center;
+                }
+            """)
+
 # Главное меню
     def setup_menu_screen(self):
         layout = QVBoxLayout()
@@ -101,6 +126,7 @@ class MainWindow(QMainWindow):
 
 # Дневник
 
+
     def setup_diary_edit_screen(self):
         layout = QVBoxLayout()
 
@@ -146,6 +172,7 @@ class MainWindow(QMainWindow):
 
 
 # Цели
+
 
     def setup_goals_screen(self):
         layout = QVBoxLayout()
