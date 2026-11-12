@@ -62,7 +62,6 @@ class MainWindow(QMainWindow):
 
 # Главное меню
 
-
     def setup_menu_screen(self):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -114,6 +113,7 @@ class MainWindow(QMainWindow):
 
 # Дневник
 
+
     def setup_diary_edit_screen(self):
         layout = QVBoxLayout()
 
@@ -159,6 +159,7 @@ class MainWindow(QMainWindow):
 
 
 # Цели
+
 
     def setup_goals_screen(self):
         layout = QVBoxLayout()
@@ -446,92 +447,6 @@ class MainWindow(QMainWindow):
                     background-image: url({smoke_img});
                     background-position: center;
                 }}
-            """)
-
-        self.db.set_setting("theme_index", str(index))
-
-    def apply_theme(self, theme_index):
-        if theme_index == 0:
-            self.setStyleSheet("background-color: #2b2b2b; color: white;")
-
-        elif theme_index == 1:
-            self.setStyleSheet("background-color: #f0f0f0; color: black;")
-
-        elif theme_index == 2:
-            self.setStyleSheet("background-color: #4a1515; color: #ffcccc;")
-
-        elif theme_index == 3:
-            self.setStyleSheet("background-color: #1a2a40; color: #d0e0f0;")
-
-        elif theme_index == 4:
-            self.setStyleSheet("background-color: #f4e1e1; color: #4a2c2c;")
-
-        elif theme_index == 5:
-            self.setStyleSheet("background-color: #3e2a20; color: #f0e6d2;")
-
-        self.settings.setValue("theme_index", theme_index)
-
-    def change_theme(self, index):
-        if index == 0:
-            bg_color, text_color = "#2b2b2b", "white"
-            menu_img, smoke_img, icon_img = "bg_menu.png", "bg_smoke.png", "icon_dark.png"
-        elif index == 1:
-            bg_color, text_color = "#f0f0f0", "black"
-            menu_img, smoke_img, icon_img = "bg_light_menu.png", "bg_light_smoke.png", "icon_light.png"
-        elif index == 2:
-            bg_color, text_color = "#4a1515", "#ffcccc"
-            menu_img, smoke_img, icon_img = "bg_red_menu.png", "bg_red_smoke.png", "icon_red.png"
-        elif index == 3:
-            bg_color, text_color = "#1a2a40", "#d0e0f0"
-            menu_img, smoke_img, icon_img = "bg_blue_menu.png", "bg_blue_smoke.png", "icon_blue.png"
-        elif index == 4:
-            bg_color, text_color = "#f4e1e1", "#4a2c2c"
-            menu_img, smoke_img, icon_img = "bg_pink_menu.png", "bg_pink_smoke.png", "icon_pink.png"
-        else:
-            bg_color, text_color = "#3e2a20", "#f0e6d2"
-            menu_img, smoke_img, icon_img = "bg_brown_menu.png", "bg_brown_smoke.png", "icon_brown.png"
-
-        self.setStyleSheet(
-            f"background-color: {bg_color}; color: {text_color};")
-        self.setWindowIcon(QIcon(f"resources/{icon_img}"))
-
-        button_style = """
-            QPushButton {
-                background-color: rgba(0, 0, 0, 120); 
-                color: white; 
-                border: 1px solid rgba(255, 255, 255, 50);
-                border-radius: 5px;
-                padding: 5px;
-            }
-        """
-
-        self.menu_screen.setAttribute(
-            Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.menu_screen.setStyleSheet(f"""
-            QWidget {{
-                background-image: url(resources/{menu_img});
-                background-position: center;
-                background-size: cover;
-                background-repeat: no-repeat;
-            }}
-            {button_style}
-        """)
-
-        screens_with_smoke = [
-            self.diary_list_screen, self.diary_edit_screen,
-            self.goals_screen, self.settings_screen
-        ]
-
-        for screen in screens_with_smoke:
-            screen.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-            screen.setStyleSheet(f"""
-                QWidget {{
-                    background-image: url(resources/{smoke_img});
-                    background-position: center;
-                    background-size: cover;
-                    background-repeat: no-repeat;
-                }}
-                {button_style}
             """)
 
         self.db.set_setting("theme_index", str(index))
