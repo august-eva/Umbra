@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem, QFileDialog, QListWidgetItem
 )
 from PyQt6.QtCore import Qt, QDate, QSettings
-from PyQt6.QtGui import QIcon, QShortcut, QKeySequence
+from PyQt6.QtGui import QIcon, QPalette, QBrush, QPixmap, QShortcut, QKeySequence
 from database import DatabaseManager
 
 
@@ -31,10 +31,6 @@ class MainWindow(QMainWindow):
             lambda: self.stack.setCurrentIndex(0))
 
         self.settings = QSettings("UmbraDev", "UmbraApp")
-
-        saved_index = int(self.settings.value("theme_index", 0))
-
-        self.apply_theme(saved_index)
 
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -63,33 +59,9 @@ class MainWindow(QMainWindow):
         self.theme_combo.setCurrentIndex(int(saved_theme))
         self.change_theme(int(saved_theme))
 
-        self.menu_screen.setAttribute(
-            Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.menu_screen.setStyleSheet("""
-            QWidget {
-                background-image: url(resources/bg_menu.png);
-                background-position: center;
-                }
-        """)
-
-        screens_with_smoke = [
-            self.diary_list_screen,
-            self.diary_edit_screen,
-            self.goals_screen,
-            self.settings_screen
-        ]
-
-        for screen in screens_with_smoke:
-            screen.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-            screen.setStyleSheet("""
-            QWidget {
-                background-image: url(resources/bg_smoke.png);
-                background-position: center;
-                }
-            """)
-
 
 # Главное меню
+
 
     def setup_menu_screen(self):
         layout = QVBoxLayout()
@@ -419,6 +391,65 @@ class MainWindow(QMainWindow):
                           "Автор: Eva August\n\n"
                           "Технологии: Python, PyQt6, SQLite3.")
 
+    def change_theme(self, index):
+        if index == 0:
+            self.setStyleSheet("background-color: #2b2b2b; color: white;")
+            self.setWindowIcon(QIcon("resources/icon_dark.png"))
+            menu_img = "resources/bg_menu.png"
+            smoke_img = "resources/bg_smoke.png"
+        elif index == 1:
+            self.setStyleSheet("background-color: #f0f0f0; color: black;")
+            self.setWindowIcon(QIcon("resources/icon_light.png"))
+            menu_img = "resources/bg_light_menu.png"
+            smoke_img = "resources/bg_light_smoke.png"
+        elif index == 2:
+            self.setStyleSheet("background-color: #4a1515; color: #ffcccc;")
+            self.setWindowIcon(QIcon("resources/icon_red.png"))
+            menu_img = "resources/bg_red_menu.png"
+            smoke_img = "resources/bg_red_smoke.png"
+        elif index == 3:
+            self.setStyleSheet("background-color: #1a2a40; color: #d0e0f0;")
+            self.setWindowIcon(QIcon("resources/icon_blue.png"))
+            menu_img = "resources/bg_blue_menu.png"
+            smoke_img = "resources/bg_blue_smoke.png"
+        elif index == 4:
+            self.setStyleSheet("background-color: #f4e1e1; color: #4a2c2c;")
+            self.setWindowIcon(QIcon("resources/icon_pink.png"))
+            menu_img = "resources/bg_pink_menu.png"
+            smoke_img = "resources/bg_pink_smoke.png"
+        elif index == 5:
+            self.setStyleSheet("background-color: #3e2a20; color: #f0e6d2;")
+            self.setWindowIcon(QIcon("resources/icon_brown.png"))
+            menu_img = "resources/bg_brown_menu.png"
+            smoke_img = "resources/bg_brown_smoke.png"
+
+        self.menu_screen.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.menu_screen.setStyleSheet(f"""
+            QWidget {{
+                background-image: url({menu_img});
+                background-position: center;
+            }}
+        """)
+
+        screens_with_smoke = [
+            self.diary_list_screen,
+            self.diary_edit_screen,
+            self.goals_screen,
+            self.settings_screen
+        ]
+
+        for screen in screens_with_smoke:
+            screen.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+            screen.setStyleSheet(f"""
+                QWidget {{
+                    background-image: url({smoke_img});
+                    background-position: center;
+                }}
+            """)
+
+        self.db.set_setting("theme_index", str(index))
+
     def apply_theme(self, theme_index):
         if theme_index == 0:
             self.setStyleSheet("background-color: #2b2b2b; color: white;")
@@ -442,28 +473,66 @@ class MainWindow(QMainWindow):
 
     def change_theme(self, index):
         if index == 0:
-            self.setStyleSheet("background-color: #2b2b2b; color: white;")
-            self.setWindowIcon(QIcon("resources/icon_dark.png"))
-
+            bg_color, text_color = "#2b2b2b", "white"
+            menu_img, smoke_img, icon_img = "bg_menu.png", "bg_smoke.png", "icon_dark.png"
         elif index == 1:
-            self.setStyleSheet("background-color: #f0f0f0; color: black;")
-            self.setWindowIcon(QIcon("resources/icon_light.png"))
-
+            bg_color, text_color = "#f0f0f0", "black"
+            menu_img, smoke_img, icon_img = "bg_light_menu.png", "bg_light_smoke.png", "icon_light.png"
         elif index == 2:
-            self.setStyleSheet("background-color: #4a1515; color: #ffcccc;")
-            self.setWindowIcon(QIcon("resources/icon_red.png"))
-
+            bg_color, text_color = "#4a1515", "#ffcccc"
+            menu_img, smoke_img, icon_img = "bg_red_menu.png", "bg_red_smoke.png", "icon_red.png"
         elif index == 3:
-            self.setStyleSheet("background-color: #1a2a40; color: #d0e0f0;")
-            self.setWindowIcon(QIcon("resources/icon_blue.png"))
-
+            bg_color, text_color = "#1a2a40", "#d0e0f0"
+            menu_img, smoke_img, icon_img = "bg_blue_menu.png", "bg_blue_smoke.png", "icon_blue.png"
         elif index == 4:
-            self.setStyleSheet("background-color: #f4e1e1; color: #4a2c2c;")
-            self.setWindowIcon(QIcon("resources/icon_pink.png"))
+            bg_color, text_color = "#f4e1e1", "#4a2c2c"
+            menu_img, smoke_img, icon_img = "bg_pink_menu.png", "bg_pink_smoke.png", "icon_pink.png"
+        else:
+            bg_color, text_color = "#3e2a20", "#f0e6d2"
+            menu_img, smoke_img, icon_img = "bg_brown_menu.png", "bg_brown_smoke.png", "icon_brown.png"
 
-        elif index == 5:
-            self.setStyleSheet("background-color: #3e2a20; color: #f0e6d2;")
-            self.setWindowIcon(QIcon("resources/icon_brown.png"))
+        self.setStyleSheet(
+            f"background-color: {bg_color}; color: {text_color};")
+        self.setWindowIcon(QIcon(f"resources/{icon_img}"))
+
+        button_style = """
+            QPushButton {
+                background-color: rgba(0, 0, 0, 120); 
+                color: white; 
+                border: 1px solid rgba(255, 255, 255, 50);
+                border-radius: 5px;
+                padding: 5px;
+            }
+        """
+
+        self.menu_screen.setAttribute(
+            Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.menu_screen.setStyleSheet(f"""
+            QWidget {{
+                background-image: url(resources/{menu_img});
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+            }}
+            {button_style}
+        """)
+
+        screens_with_smoke = [
+            self.diary_list_screen, self.diary_edit_screen,
+            self.goals_screen, self.settings_screen
+        ]
+
+        for screen in screens_with_smoke:
+            screen.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+            screen.setStyleSheet(f"""
+                QWidget {{
+                    background-image: url(resources/{smoke_img});
+                    background-position: center;
+                    background-size: cover;
+                    background-repeat: no-repeat;
+                }}
+                {button_style}
+            """)
 
         self.db.set_setting("theme_index", str(index))
 
