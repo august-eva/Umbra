@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem, QFileDialog, QListWidgetItem
 )
 from PyQt6.QtCore import Qt, QDate, QSettings
+from PyQt6.QtGui import QIcon
 from database import DatabaseManager
 
 
@@ -44,6 +45,7 @@ class MainWindow(QMainWindow):
 
         self.load_notes()
         self.load_goals()
+        self.change_theme(0)
 
 # Главное меню
     def setup_menu_screen(self):
@@ -364,7 +366,29 @@ class MainWindow(QMainWindow):
         self.settings.setValue("theme_index", theme_index)
 
     def change_theme(self, index):
-        self.apply_theme(index)
+        if index == 0:
+            self.setStyleSheet("background-color: #2b2b2b; color: white;")
+            self.setWindowIcon(QIcon("resources/icon_dark.png"))
+
+        elif index == 1:
+            self.setStyleSheet("background-color: #f0f0f0; color: black;")
+            self.setWindowIcon(QIcon("resources/icon_light.png"))
+
+        elif index == 2:
+            self.setStyleSheet("background-color: #4a1515; color: #ffcccc;")
+            self.setWindowIcon(QIcon("resources/icon_red.png"))
+
+        elif index == 3:
+            self.setStyleSheet("background-color: #1a2a40; color: #d0e0f0;")
+            self.setWindowIcon(QIcon("resources/icon_blue.png"))
+
+        elif index == 4:
+            self.setStyleSheet("background-color: #f4e1e1; color: #4a2c2c;")
+            self.setWindowIcon(QIcon("resources/icon_pink.png"))
+
+        elif index == 5:
+            self.setStyleSheet("background-color: #3e2a20; color: #f0e6d2;")
+            self.setWindowIcon(QIcon("resources/icon_brown.png"))
 
     def closeEvent(self, event):
         reply = QMessageBox.question(

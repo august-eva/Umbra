@@ -74,7 +74,7 @@ class DatabaseManager:
 
     def update_note(self, note_id, title, text, mood):
         try:
-            self.cursor.execute("UPDATE notes SET titla=?, text=?, mood=? WHERE id=?," (
+            self.cursor.execute("UPDATE notes SET title=?, text=?, mood=? WHERE id=?," (
                 title, text, mood, note_id))
             self.connection.commit()
             return True
