@@ -2,7 +2,7 @@ import sys
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel,
     QPushButton, QStackedWidget, QTextEdit, QComboBox, QHBoxLayout, QMessageBox,
-    QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem, QFileDialog
+    QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem, QFileDialog, QListWidgetItem
 )
 from PyQt6.QtCore import Qt, QDate, QSettings
 from database import DatabaseManager
@@ -25,21 +25,23 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stack)
 
         self.menu_screen = QWidget()
-        self.diary_screen = QWidget()
+        self.diary_list_screen = QWidget()
+        self.diary_edit_screen = QWidget()
         self.goals_screen = QWidget()
         self.settings_screen = QWidget()
 
         self.stack.addWidget(self.menu_screen)
-        self.stack.addWidget(self.diary_screen)
+        self.stack.addWidget(self.diary_list_screen)
+        self.stack.addWidget(self.diary_edit_screen)
         self.stack.addWidget(self.goals_screen)
         self.stack.addWidget(self.settings_screen)
 
         self.setup_menu_screen()
-        self.setup_diary_screen()
+        self.setup_diary_list_screen()
+        self.setup_diary_edit_screen()
         self.setup_goals_screen()
         self.setup_settings_screen()
 
-        self.setup_settings_screen()
         self.load_notes()
         self.load_goals()
 
@@ -69,14 +71,10 @@ class MainWindow(QMainWindow):
         self.menu_screen.setLayout(layout)
 
         btn_diary.clicked.connect(lambda: self.stack.setCurrentIndex(1))
-        btn_goals.clicked.connect(lambda: self.stack.setCurrentIndex(2))
-        btn_settings.clicked.connect(lambda: self.stack.setCurrentIndex(3))
+        btn_goals.clicked.connect(lambda: self.stack.setCurrentIndex(3))
+        btn_settings.clicked.connect(lambda: self.stack.setCurrentIndex(4))
 
-
-# Дневник
-
-
-    def setup_diary_screen(self):
+    def setup_diary_list_screen(self):
         layout = QVBoxLayout()
 
         btn_back = QPushButton("← Назад в меню")
@@ -84,34 +82,67 @@ class MainWindow(QMainWindow):
         btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         layout.addWidget(btn_back)
 
+        btn_new = QPushButton("📑Создать новую запись")
+        btn_new.setFixedHeight(40)
+        btn_new.clicked.connect(lambda: self.stack.setCurrentIndex(2))
+        layout.addWidget(btn_new)
+
+        self.notes_list = QListWidget()
+
+        self.notes_list.itemClicked.connect(self.read_note)
+        layout.addWidget(self.notes_list)
+
+        self.diary_list_screen.setLayout(layout)
+
+
+# Дневник
+
+    def setup_diary_edit_screen(self):
+        layout = QVBoxLayout()
+
+        btn_cancel = QPushButton("← Отмена")
+        btn_cancel.setFixedWidth(150)
+        btn_cancel.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        layout.addWidget(btn_cancel)
+
         self.title_input = QLineEdit()
         self.title_input.setPlaceholderText(
             "Название записи (например,  'Мой день')...")
         layout.addWidget(self.title_input)
 
-        mood_layout = QHBoxLayout()
-        mood_layout.addWidget(QLabel("Настроение:"))
-
         self.mood_combo = QComboBox()
         self.mood_combo.addItems(
             ["Радость", "Грусть", "Вдохновение", "Злость"])
-        mood_layout.addWidget(self.mood_combo)
-
-        layout.addLayout(mood_layout)
+        layout.addWidget(self.mood_combo)
 
         self.text_edit = QTextEdit()
         self.text_edit.setPlaceholderText("Напиши свои мысли здесь...")
         layout.addWidget(self.text_edit)
 
-        btn_save = QPushButton("💾 Сохранить")
+        btn_save = QPushButton("💾 Сохранить запись")
+        btn_save.setFixedHeight(40)
         btn_save.clicked.connect(self.save_note)
         layout.addWidget(btn_save)
-        self.notes_list = QListWidget()
-        layout.addWidget(self.notes_list)
 
-        self.diary_screen.setLayout(layout)
+        btn_delete = QPushButton("🗑️Удалить запись")
+        btn_delete.setStyleSheet("background-color: #8b0000; color: white;")
+        btn_delete.clicked.connect(self.delete_current_note)
+        layout.addWidget(btn_delete)
+
+        self.diary_edit_screen.setLayout(layout)
+
+    def delete_current_note(self):
+        if hasattr(self, 'current_note_id') and self.current_note_id is not None:
+            self.db.delete_note(self.current_note_id)
+            self.current_note_id = None
+            self.title_input.clear()
+            self.text_edit.clear()
+            self.load_notes()
+            self.stack.setCurrentIndex(1)
+
 
 # Цели
+
     def setup_goals_screen(self):
         layout = QVBoxLayout()
 
@@ -190,35 +221,49 @@ class MainWindow(QMainWindow):
 
         if not title or not text:
             QMessageBox.warning(
-                self, "Ошибка", "Пожалуйста, заполни название и текст записи!")
+                self, "Ошибка", "Заполни название и текст!")
             return
 
-        self.db.cursor.execute(
-            "INSERT INTO notes (title, text, mood) VALUES (?, ?, ?)",
-            (title, text, mood)
-        )
+        if hasattr(self, 'current_note_id') and self.current_note_id is not None:
+            self.db.update_note(self.current_note_id, title, text, mood)
+            self.current_note_id = None
+        else:
+            self.db.cursor.execute(
+                "INSERT INTO notes (title, text, mood) VALUES (?, ?, ?)",
+                (title, text, mood)
+            )
         self.db.connection.commit()
 
         self.title_input.clear()
         self.text_edit.clear()
         self.load_notes()
+        self.stack.setCurrentIndex(1)
         QMessageBox.information(self, "Успех", "Запись сохранена в дневник!")
 
     def load_notes(self):
         self.notes_list.clear()
 
-        notes = self.db.cursor.execute(
-            "SELECT * FROM notes ORDER BY id DESC").fetchall()
+        notes = self.db.get_notes()
 
         for note in notes:
-            title = note[1]
-            text = note[2]
-            mood = note[3]
+            display_text = f"✍ {note[1]} | {note[3]}"
+            item = QListWidgetItem(display_text)
 
-            text_preview = text[:30] + "..." if len(text) > 30 else text
+            item.setData(Qt.ItemDataRole.UserRole, note)
+            self.notes_list.addItem(item)
 
-            display_text = f"✍ {title} | {mood}\n{text_preview}"
-            self.notes_list.addItem(display_text)
+    def read_note(self, item):
+        note = item.data(Qt.ItemDataRole.UserRole)
+
+        self.current_note_id = note[0]
+
+        self.title_input.setText(note[1])
+        self.text_edit.setText(note[2])
+        index = self.mood_combo.findText(note[3])
+        if index >= 0:
+            self.mood_combo.setCurrentIndex(index)
+
+        self.stack.setCurrentIndex(2)
 
     def save_goal(self):
         text = self.goal_input.text().strip()

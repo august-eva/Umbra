@@ -72,6 +72,24 @@ class DatabaseManager:
             print(f"Ошибка при получении заметок: {e}")
             return []
 
+    def update_note(self, note_id, title, text, mood):
+        try:
+            self.cursor.execute("UPDATE notes SET titla=?, text=?, mood=? WHERE id=?," (
+                title, text, mood, note_id))
+            self.connection.commit()
+            return True
+        except sqlite3.Error:
+            return False
+
+    def delete_note(self, note_id):
+        try:
+            self.cursor.execute("DELETE FROM notes WHERE id=?", (note_id,))
+            self.connection.commit()
+            return True
+        except sqlite3.Error as e:
+            print(f"Ошибка при удалении:{e}")
+            return False
+
     def close(self):
         if self.connection:
             self.connection.close()
