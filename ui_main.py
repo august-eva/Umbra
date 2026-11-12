@@ -178,6 +178,13 @@ class MainWindow(QMainWindow):
         self.goals_table.setColumnHidden(0, True)
         layout.addWidget(self.goals_table)
 
+        btn_delete_goal = QPushButton("❗Удалить выбранную цель")
+        btn_delete_goal.setFixedHeight(40)
+        btn_delete_goal.setStyleSheet(
+            "background-color: #8b0000; color: white; border-radius: 5px;")
+        btn_delete_goal.clicked.connect(self.delete_selected_goal)
+        layout.addWidget(btn_delete_goal)
+
         self.goals_screen.setLayout(layout)
 
 # Настройки
@@ -317,6 +324,31 @@ class MainWindow(QMainWindow):
             self.goals_table.setItem(row_number, 0, id_item)
             self.goals_table.setItem(row_number, 1, text_item)
             self.goals_table.setItem(row_number, 2, deadline_item)
+
+    def delete_selected_goal(self):
+        current_row = self.goals_table.currentRow()
+
+        if current_row < 0:
+            QMessageBox.warning(
+                self, "Ошибка", "Пожалуйста,сначала выберите цель в таблице!")
+            return
+
+        goal_id = int(self.goals_table.item(current_row, 0).text())
+        goal_text = self.goals_table.item(current_row, 1).text()
+
+        reply = QMessageBox.question(
+            self, "Подтверждение",
+            f"Вы уверены, что хотите удалить цель:\n'{goal_text}'?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            if self.db.delete_goal(goal_id):
+                self.load_goals()
+                QMessageBox.information(self, "Успех", "Цель удалена!")
+            else:
+                QMessageBox.critical(
+                    self, "Ошибка", "Не удалось удалить цель из базы.")
 
     def export_to_txt(self):
         notes = self.db.get_notes()

@@ -97,6 +97,14 @@ class DatabaseManager:
             print(f"Ошибка при удалении:{e}")
             return False
 
+    def delete_goal(self, goal_id):
+        try:
+            self.cursor.execute("DELETE FROM goals WHERE id=?", (goal_id,))
+            self.connection.commit()
+            return True
+        except sqlite3.Error:
+            return False
+
     def set_setting(self, key, value):
         try:
             self.cursor.execute(
