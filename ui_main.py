@@ -45,7 +45,9 @@ class MainWindow(QMainWindow):
 
         self.load_notes()
         self.load_goals()
-        self.change_theme(0)
+        saved_theme = self.db.get_settings("theme_index", "0")
+        self.theme_combo.setCurrentIndex(int(saved_theme))
+        self.change_theme(int(saved_theme))
 
 # Главное меню
     def setup_menu_screen(self):
@@ -389,6 +391,8 @@ class MainWindow(QMainWindow):
         elif index == 5:
             self.setStyleSheet("background-color: #3e2a20; color: #f0e6d2;")
             self.setWindowIcon(QIcon("resources/icon_brown.png"))
+
+        self.db.set_setting("theme_index", str(index))
 
     def closeEvent(self, event):
         reply = QMessageBox.question(

@@ -38,8 +38,15 @@ class DatabaseManager:
             self.cursor.execute(create_goals_query)
             self.cursor.execute(create_goals_index_query)
 
+            self.cursor.execute('''
+                CREATE TABLE IF NOT EXISTS settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT
+                    )
+            ''')
+
             self.connection.commit()
-            print("Таблицы 'notes' и 'goals' успешно созданы или уже существуют.")
+            print("Все таблицы (notes, goals, settings) успешно созданы.")
 
         except sqlite3.Error as e:
             self.connection.rollback()
@@ -89,6 +96,23 @@ class DatabaseManager:
         except sqlite3.Error as e:
             print(f"Ошибка при удалении:{e}")
             return False
+
+    def set_setting(self, key, value):
+        try:
+            self.cursor.execute(
+                "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, value))
+            self.connection.commit()
+        except sqlite3.Error as e:
+            print(f"Ошибка сохранения настройки: {e}")
+
+    def get_settings(self, key, default=None):
+        try:
+            self.cursor.execute(
+                "SELECT value FROM  settings WHERE key=?", (key,))
+            result = self.cursor.fetchone()
+            return result[0] if result else default
+        except sqlite3.Error:
+            return default
 
     def close(self):
         if self.connection:
