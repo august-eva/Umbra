@@ -64,6 +64,14 @@ class DatabaseManager:
             print(f"Ошибка при получении цели: {e}")
             return []
 
+    def get_notes(self):
+        try:
+            self.cursor.execute("SELECT * FROM  notes ORDER BY id  DESC")
+            return self.cursor.fetchall()
+        except sqlite3.Error as e:
+            print(f"Ошибка при получении заметок: {e}")
+            return []
+
     def close(self):
         if self.connection:
             self.connection.close()
