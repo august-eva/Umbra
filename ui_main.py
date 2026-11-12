@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem, QFileDialog, QListWidgetItem
 )
 from PyQt6.QtCore import Qt, QDate, QSettings
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QShortcut, QKeySequence
 from database import DatabaseManager
 
 
@@ -15,6 +15,20 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Umbra")
         self.resize(800, 600)
         self.db = DatabaseManager()
+
+
+# Ctrl+S-сохранить запись
+        self.shortcut_save = QShortcut(QKeySequence("Ctrl+S"), self)
+        self.shortcut_save.activated.connect(self.save_note)
+
+# Ctrl+E-экспорт дневника
+        self.shortcut_export = QShortcut(QKeySequence("Ctrl+E"), self)
+        self.shortcut_export.activated.connect(self.export_to_txt)
+
+# Esc-вернуться в меню
+        self.shortcut_back = QShortcut(QKeySequence("Esc"), self)
+        self.shortcut_back.activated.connect(
+            lambda: self.stack.setCurrentIndex(0))
 
         self.settings = QSettings("UmbraDev", "UmbraApp")
 
@@ -74,7 +88,9 @@ class MainWindow(QMainWindow):
                 }
             """)
 
+
 # Главное меню
+
     def setup_menu_screen(self):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -126,7 +142,6 @@ class MainWindow(QMainWindow):
 
 # Дневник
 
-
     def setup_diary_edit_screen(self):
         layout = QVBoxLayout()
 
@@ -172,7 +187,6 @@ class MainWindow(QMainWindow):
 
 
 # Цели
-
 
     def setup_goals_screen(self):
         layout = QVBoxLayout()
@@ -452,6 +466,22 @@ class MainWindow(QMainWindow):
             self.setWindowIcon(QIcon("resources/icon_brown.png"))
 
         self.db.set_setting("theme_index", str(index))
+
+    def clear_diary(self):
+        reply = QMessageBox.question(
+            self, "ВНИМАНИЕ!",
+            "Вы уверены,что хотите удалить ВСЕ записи?\nЭто действие нельзя отменить!",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            if self.db.delete_all_notes():
+                self.load_notes()
+                QMessageBox.information(
+                    self, "Успех", "Дневник полностью очищен.")
+            else:
+                QMessageBox.critical(
+                    self, "Ошибка", "Не удалось очистить дневник.")
 
     def closeEvent(self, event):
         reply = QMessageBox.question(

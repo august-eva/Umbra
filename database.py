@@ -122,6 +122,14 @@ class DatabaseManager:
         except sqlite3.Error:
             return default
 
+    def delete_all_notes(self):
+        try:
+            self.cursor.execute("DELETE FROM notes")
+            self.connection.commit()
+            return True
+        except sqlite3.Error:
+            return False
+
     def close(self):
         if self.connection:
             self.connection.close()
