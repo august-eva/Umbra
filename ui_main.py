@@ -8,6 +8,96 @@ from PyQt6.QtCore import Qt, QDate, QSettings
 from PyQt6.QtGui import QIcon, QPalette, QBrush, QPixmap, QShortcut, QKeySequence
 from database import DatabaseManager
 
+TRANSLATIONS = {
+    "ru": {
+        "menu_title": "Добро пожаловать в Umbra 🌒",
+        "btn_diary": "📖 Мой дневник",
+        "btn_goals": "🎯 Мои цели",
+        "btn_settings": "⚙️ Настройки",
+        "back": "← Назад в меню",
+        "save": "💾 Сохранить",
+        "export": "📤 Экспорт дневника в TXT",
+        "about": "ℹ️ О программе",
+        "set_data": "Сохранение данных:",
+        "set_view": "Внешний вид и язык:",
+        "set_lang": "Язык интерфейса:",
+        "set_theme": "Тема оформления:",
+        "goal_ph": "Введите название цели...",
+        "goal_col1": "Цель",
+        "goal_col2": "Дедлайн",
+        "note_title_ph": "Название записи...",
+        "note_text_ph": "Напиши свои мысли здесь...",
+        "msg_success": "Успех",
+        "msg_saved": "Запись сохранена!",
+        "msg_err_empty": "Заполни название и текст!",
+        "msg_close_title": "Выход",
+        "msg_close_text": "Вы уверены, что хотите закрыть Umbra?",
+        "btn_cancel": "← Отмена",
+        "btn_del_note": "🗑️ Удалить запись",
+        "btn_new_note": "➕ Создать новую запись",
+        "btn_add_goal": "➕ Добавить цель",
+        "btn_del_goal": "🗑️ Удалить выбранную цель"
+    },
+    "en": {
+        "menu_title": "Welcome to Umbra 🌒",
+        "btn_diary": "📖 My Diary",
+        "btn_goals": "🎯 My Goals",
+        "btn_settings": "⚙️ Settings",
+        "back": "← Back to Menu",
+        "save": "💾 Save",
+        "export": "📤 Export Diary to TXT",
+        "about": "ℹ️ About",
+        "set_data": "Data saving:",
+        "set_view": "Appearance & Language:",
+        "set_lang": "Interface language:",
+        "set_theme": "Theme:",
+        "goal_ph": "Enter goal name...",
+        "goal_col1": "Goal",
+        "goal_col2": "Deadline",
+        "note_title_ph": "Note title...",
+        "note_text_ph": "Write your thoughts here...",
+        "msg_success": "Success",
+        "msg_saved": "Note saved!",
+        "msg_err_empty": "Fill in the title and text!",
+        "msg_close_title": "Exit",
+        "msg_close_text": "Are you sure you want to close Umbra?",
+        "btn_cancel": "← Cancel",
+        "btn_del_note": "🗑️ Delete note",
+        "btn_new_note": "➕ Create new note",
+        "btn_add_goal": "➕ Add goal",
+        "btn_del_goal": "🗑️ Delete selected goal"
+    },
+    "es": {
+        "menu_title": "Bienvenido a Umbra 🌒",
+        "btn_diary": "📖 Mi Diario",
+        "btn_goals": "🎯 Mis Metas",
+        "btn_settings": "⚙️ Ajustes",
+        "back": "← Volver al Menú",
+        "save": "💾 Guardar",
+        "export": "📤 Exportar Diario a TXT",
+        "about": "ℹ️ Acerca de",
+        "set_data": "Guardado de datos:",
+        "set_view": "Apariencia e Idioma:",
+        "set_lang": "Idioma de la interfaz:",
+        "set_theme": "Tema:",
+        "goal_ph": "Ingrese el nombre de la meta...",
+        "goal_col1": "Meta",
+        "goal_col2": "Fecha límite",
+        "note_title_ph": "Título de la nota...",
+        "note_text_ph": "Escribe tus pensamientos aquí...",
+        "msg_success": "Éxito",
+        "msg_saved": "¡Nota guardada!",
+        "msg_err_empty": "¡Rellena el título y el texto!",
+        "msg_close_title": "Salir",
+        "msg_close_text": "¿Estás seguro de que quieres cerrar Umbra?",
+        "btn_cancel": "← Cancelar",
+        "btn_del_note": "🗑️ Eliminar nota",
+        "btn_new_note": "➕ Crear nueva nota",
+        "btn_add_goal": "➕ Añadir meta",
+        "btn_del_goal": "🗑️ Eliminar meta seleccionada"
+    }
+}
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -15,7 +105,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Umbra")
         self.resize(800, 600)
         self.db = DatabaseManager()
-
+        self.current_lang = "ru"
 
 # Ctrl+S-сохранить запись
         self.shortcut_save = QShortcut(QKeySequence("Ctrl+S"), self)
@@ -62,47 +152,52 @@ class MainWindow(QMainWindow):
 
 # Главное меню
 
-
     def setup_menu_screen(self):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.setSpacing(20)
 
-        title = QLabel("Добро пожаловать в Umbra 🌒")
-        title.setStyleSheet(
+        self.label_title = QLabel("Добро пожаловать в Umbra 🌒")
+        self.label_title.setStyleSheet(
             "font-size: 28px; font-weight: bold; margin-bottom: 30px;")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(title)
+        self.label_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.label_title)
 
-        btn_diary = QPushButton("📖 Мой дневник")
-        btn_goals = QPushButton("🎯 Мои цели")
-        btn_settings = QPushButton("⚙️ Настройки")
+        self.btn_diary = QPushButton("📖 Мой дневник")
+        self.btn_goals = QPushButton("🎯 Мои цели")
+        self.btn_settings = QPushButton("⚙️ Настройки")
 
-        for btn in [btn_diary, btn_goals, btn_settings]:
+        for btn in [self.btn_diary, self.btn_goals, self.btn_settings]:
             btn.setFixedSize(250, 50)
 
-        layout.addWidget(btn_diary, alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(btn_goals, alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(btn_settings, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(
+            self.btn_diary, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(
+            self.btn_goals, alignment=Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.btn_settings,
+                         alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.menu_screen.setLayout(layout)
 
-        btn_diary.clicked.connect(lambda: self.stack.setCurrentIndex(1))
-        btn_goals.clicked.connect(lambda: self.stack.setCurrentIndex(3))
-        btn_settings.clicked.connect(lambda: self.stack.setCurrentIndex(4))
+        self.btn_diary.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        self.btn_goals.clicked.connect(lambda: self.stack.setCurrentIndex(3))
+        self.btn_settings.clicked.connect(
+            lambda: self.stack.setCurrentIndex(4))
 
     def setup_diary_list_screen(self):
         layout = QVBoxLayout()
 
-        btn_back = QPushButton("← Назад в меню")
-        btn_back.setFixedWidth(200)
-        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
-        layout.addWidget(btn_back)
+        self.btn_back_diary = QPushButton("← Назад в меню")
+        self.btn_back_diary.setFixedWidth(200)
+        self.btn_back_diary.clicked.connect(
+            lambda: self.stack.setCurrentIndex(0))
+        layout.addWidget(self.btn_back_diary)
 
-        btn_new = QPushButton("📑Создать новую запись")
-        btn_new.setFixedHeight(40)
-        btn_new.clicked.connect(lambda: self.stack.setCurrentIndex(2))
-        layout.addWidget(btn_new)
+        self.btn_new_note = QPushButton("📑Создать новую запись")
+        self.btn_new_note.setFixedHeight(40)
+        self.btn_new_note.clicked.connect(
+            lambda: self.stack.setCurrentIndex(2))
+        layout.addWidget(self.btn_new_note)
 
         self.notes_list = QListWidget()
 
@@ -114,13 +209,13 @@ class MainWindow(QMainWindow):
 
 # Дневник
 
+
     def setup_diary_edit_screen(self):
         layout = QVBoxLayout()
 
-        btn_cancel = QPushButton("← Отмена")
-        btn_cancel.setFixedWidth(200)
-        btn_cancel.clicked.connect(lambda: self.stack.setCurrentIndex(1))
-        layout.addWidget(btn_cancel)
+        self.btn_cancel = QPushButton("← Отмена")
+        self.btn_cancel.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        layout.addWidget(self.btn_cancel)
 
         self.title_input = QLineEdit()
         self.title_input.setPlaceholderText(
@@ -136,15 +231,13 @@ class MainWindow(QMainWindow):
         self.text_edit.setPlaceholderText("Напиши свои мысли здесь...")
         layout.addWidget(self.text_edit)
 
-        btn_save = QPushButton("💾 Сохранить запись")
-        btn_save.setFixedHeight(40)
-        btn_save.clicked.connect(self.save_note)
-        layout.addWidget(btn_save)
+        self.btn_save_note = QPushButton("💾 Сохранить запись")
+        self.btn_save_note.setFixedHeight(40)
+        self.btn_save_note.clicked.connect(self.save_note)
+        layout.addWidget(self.btn_save_note)
 
-        btn_delete = QPushButton("🗑️Удалить запись")
-        btn_delete.setStyleSheet("background-color: #8b0000; color: white;")
-        btn_delete.clicked.connect(self.delete_current_note)
-        layout.addWidget(btn_delete)
+        self.btn_delete_note = QPushButton("🗑️Удалить запись")
+        layout.addWidget(self.btn_delete_note)
 
         self.diary_edit_screen.setLayout(layout)
 
@@ -160,13 +253,15 @@ class MainWindow(QMainWindow):
 
 # Цели
 
+
     def setup_goals_screen(self):
         layout = QVBoxLayout()
 
-        btn_back = QPushButton("← Назад в меню")
-        btn_back.setFixedWidth(200)
-        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
-        layout.addWidget(btn_back)
+        self.btn_back_goals = QPushButton("← Назад в меню")
+        self.btn_back_goals.setFixedWidth(200)
+        self.btn_back_goals.clicked.connect(
+            lambda: self.stack.setCurrentIndex(0))
+        layout.addWidget(self.btn_back_goals)
 
         self.goal_input = QLineEdit()
         self.goal_input.setPlaceholderText("Введите название цели...")
@@ -179,9 +274,8 @@ class MainWindow(QMainWindow):
         self.goal_date.setDate(QDate.currentDate())
         goal_controls.addWidget(self.goal_date)
 
-        btn_add_goal = QPushButton("🖋 Добавить цель")
-        btn_add_goal.clicked.connect(self.save_goal)
-        goal_controls.addWidget(btn_add_goal)
+        self.btn_add_goal = QPushButton("🖋 Добавить цель")
+        goal_controls.addWidget(self.btn_add_goal)
 
         layout.addLayout(goal_controls)
 
@@ -191,12 +285,8 @@ class MainWindow(QMainWindow):
         self.goals_table.setColumnHidden(0, True)
         layout.addWidget(self.goals_table)
 
-        btn_delete_goal = QPushButton("❗Удалить выбранную цель")
-        btn_delete_goal.setFixedHeight(40)
-        btn_delete_goal.setStyleSheet(
-            "background-color: #8b0000; color: white; border-radius: 5px;")
-        btn_delete_goal.clicked.connect(self.delete_selected_goal)
-        layout.addWidget(btn_delete_goal)
+        self.btn_delete_goal = QPushButton("❗Удалить выбранную цель")
+        layout.addWidget(self.btn_delete_goal)
 
         self.goals_screen.setLayout(layout)
 
@@ -204,30 +294,36 @@ class MainWindow(QMainWindow):
     def setup_settings_screen(self):
         layout = QVBoxLayout()
 
-        btn_back = QPushButton("← Назад в меню")
-        btn_back.setFixedWidth(200)
-        btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
-        layout.addWidget(btn_back)
+        self.btn_back_setting = QPushButton("← Назад в меню")
+        self.btn_back_setting.setFixedWidth(200)
+        self.btn_back_setting.clicked.connect(
+            lambda: self.stack.setCurrentIndex(0))
+        layout.addWidget(self.btn_back_setting)
 
-        layout.addWidget(QLabel("<b>Сохранение данных:</b>"))
+        self.label_set_data = QLabel("Сохранение данных:")
+        layout.addWidget(self.label_set_data)
+
         self.btn_export = QPushButton("📨Экспорт дневника в TXT")
-        self.btn_export.setFixedHeight(40)
-        self.btn_export.clicked.connect(self.export_to_txt)
         layout.addWidget(self.btn_export)
 
-        layout.addSpacing(20)
-        layout.addWidget(QLabel("<b>Внешний вид и язык:</b>"))
+        self.label_set_view = QLabel("Внешний вид и язык:")
+        layout.addWidget(self.label_set_view)
+
+        self.label_set_lang = QLabel("Язык интерфейса:")
+        layout.addWidget(self.label_set_lang)
 
         self.lang_combo = QComboBox()
-        self.lang_combo.addItems(["Русский", "English", "Espanol"])
-        layout.addWidget(QLabel("Язык интерфейса:"))
+        self.lang_combo.addItems(["Русский", "English", "Español"])
+        self.lang_combo.currentIndexChanged.connect(self.change_language)
         layout.addWidget(self.lang_combo)
+
+        self.label_set_theme = QLabel("Тема оформления:")
+        layout.addWidget(self.label_set_theme)
 
         self.theme_combo = QComboBox()
         self, self.theme_combo.addItems(
             ["Темная тема", "Светлая тема", "Красная тема", "Синяя тема", "Розовая тема", "Коричневая тема"])
         self.theme_combo.currentIndexChanged.connect(self.change_theme)
-        layout.addWidget(QLabel("Тема оформления:"))
         layout.addWidget(self.theme_combo)
 
         layout.addSpacing(20)
@@ -240,26 +336,20 @@ class MainWindow(QMainWindow):
 
     def show_support_phrase(self, mood):
         import random
-        phrases = {
-            "Радость": ["Это чудесно! Сохрани это мгновение.", "Ваша улыбка делает этот мир лучше.", "Продолжай сиять!"],
-            "Грусть": ["Все проходит, и это пройдет. Ты справишься.", "Позволь себе чувствовать. Завтра будет новый день.", "Даже если сейчас темно,рассвет все равно будет."],
-            "Вдохновение": ["Лови волну! Ты можешь создать нечто великое.", "Твоя энергм заразительна, не теряй её.", "Это отличный момент,чтобы начать что-то новое."],
-            "Злость": ["Выдохни. Твои чувства важны, но не дай им управлять собой.", "Иногда злость - это топливо для перемен.", "Сделай глубокий вдох. Ты сильнее всего этого."]
-        }
+        lang = self.current_lang
 
-        selected_phrase = random.choice(
-            phrases.get(mood, ["Твой дневник всегда рядом."]))
-
-        QMessageBox.information(self, "Фраза поддержки", selected_phrase)
+        phrases = SUPPORT_PHRASES[lang].get(mood, ["Дневник всегда рядом."])
+        selected_phrase = random.choice(phrases)
+        QMessageBox.information(self, "Поддержка", selected_phrase)
 
     def save_note(self):
         title = self.title_input.text().strip()
         text = self.text_edit.toPlainText().strip()
         mood = self.mood_combo.currentText()
+        t = TRANSLATIONS[self.current_lang]
 
         if not title or not text:
-            QMessageBox.warning(
-                self, "Ошибка", "Заполни название и текст!")
+            QMessageBox.warning(self, "Ошибка", t["msg_err_empty"])
             return
 
         if hasattr(self, 'current_note_id') and self.current_note_id is not None:
@@ -276,7 +366,7 @@ class MainWindow(QMainWindow):
         self.text_edit.clear()
         self.load_notes()
         self.stack.setCurrentIndex(1)
-        QMessageBox.information(self, "Успех", "Запись сохранена в дневник!")
+        QMessageBox.information(self, t["msg_success"], t["msg_saved"])
         self.show_support_phrase(mood)
 
     def load_notes(self):
@@ -407,6 +497,7 @@ class MainWindow(QMainWindow):
                           "Технологии: Python, PyQt6, SQLite3.")
 
     def change_theme(self, index):
+        print(f"Меняем язык на индекс: {index}")
         if index == 0:
             self.setWindowIcon(QIcon("resources/icon_dark.png"))
             menu_img, smoke_img, text_color = "bg_menu.png", "bg_smoke.png", "white"
@@ -442,15 +533,15 @@ class MainWindow(QMainWindow):
             """)
 
         global_styles = f"""
-            QLabel {{ 
-                color: {text_color}; 
-                background-color: transparent; 
+            QLabel {{
+                color: {text_color};
+                background-color: transparent;
                 font-family: 'Segoe UI', sans-serif;
                 font-size: 15px;
             }}
-            QPushButton {{ 
-                background-color: rgba(20, 20, 20, 180); 
-                color: white; 
+            QPushButton {{
+                background-color: rgba(20, 20, 20, 180);
+                color: white;
                 border: 1px solid rgba(255, 255, 255, 60);
                 border-radius: 12px; /* Сильное скругление кнопок */
                 padding: 12px 20px;
@@ -458,16 +549,16 @@ class MainWindow(QMainWindow):
                 font-size: 14px;
                 font-weight: bold;
             }}
-            QPushButton:hover {{ 
+            QPushButton:hover {{
                 background-color: rgba(60, 60, 60, 220); /* Светлеет при наведении */
                 border: 1px solid rgba(255, 255, 255, 150);
             }}
             QPushButton:pressed {{
                 background-color: rgba(0, 0, 0, 220); /* Темнеет при нажатии */
             }}
-            QLineEdit, QTextEdit, QComboBox, QListWidget, QTableWidget {{ 
-                background-color: rgba(20, 20, 20, 150); 
-                color: white; 
+            QLineEdit, QTextEdit, QComboBox, QListWidget, QTableWidget {{
+                background-color: rgba(20, 20, 20, 150);
+                color: white;
                 border: 1px solid rgba(255, 255, 255, 50);
                 border-radius: 8px; /* Скругление полей ввода */
                 padding: 8px;
@@ -516,9 +607,86 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(
                     self, "Ошибка", "Не удалось очистить дневник.")
 
+    def change_language(self, index):
+        if index == 0:
+            lang = "ru"
+        elif index == 1:
+            lang = "en"
+        else:
+            lang = "es"
+
+        self.current_lang = lang
+        t = TRANSLATIONS[lang]
+
+# Главное меню
+        self.label_title.setText(t["menu_title"])
+        self.btn_diary.setText(t["btn_diary"])
+        self.btn_goals.setText(t["btn_goals"])
+        self.btn_settings.setText(t["btn_settings"])
+
+# Кнопки назад
+        self.btn_back_diary.setText(t["back"])
+        self.btn_back_goals.setText(t["back"])
+        self.btn_back_setting.setText(t["back"])
+
+# Кнопки дейсвий
+        self.btn_save_note.setText(t["save"])
+        self.btn_export.setText(t["export"])
+
+        self.btn_cancel.setText(t["btn_cancel"])
+        self.btn_delete_note.setText(t["btn_del_note"])
+        self.btn_new_note.setText(t["btn_new_note"])
+        self.btn_add_goal.setText(t["btn_add_goal"])
+        self.btn_delete_goal.setText(t["btn_del_goal"])
+
+# Настройки
+        self.label_set_data.setText(t["set_data"])
+        self.label_set_view.setText(t["set_view"])
+        self.label_set_lang.setText(t["set_lang"])
+        self.label_set_theme.setText(t["set_theme"])
+
+# Цели
+        self.goal_input.setPlaceholderText(t["goal_ph"])
+        self.goals_table.setHorizontalHeaderLabels(
+            ["ID", t["goal_col1"], t["goal_col2"]]
+        )
+
+# Дневник
+        self.title_input.setPlaceholderText(t["note_title_ph"])
+        self.text_edit.setPlaceholderText(t["note_text_ph"])
+
+# Настроения
+        self.mood_combo.clear()
+        if lang == "ru":
+            self.mood_combo.addItems(
+                ["Радость", "Грусть", "Вдохновение", "Злость"])
+        elif lang == "en":
+            self.mood_combo.addItems(
+                ["Joy", "Sadness", "Inspiration", "Anger"])
+        else:
+            self.mood_combo.addItems(
+                ["Alegría", "Tristeza", "Inspiración", "Ira"])
+
+        self.btn_about.setText(t["about"])
+
+# Темы
+        self.theme_combo.clear()
+        if lang == "ru":
+            self.theme_combo.addItems(
+                ["Темная тема", "Светлая тема", "Красная тема", "Синяя тема", "Розовая тема", "Коричневая тема"])
+        elif lang == "en":
+            self.theme_combo.addItems(
+                ["Dark theme", "Light theme", "Red theme", "Blue theme", "Pink theme", "Brown theme"])
+        else:
+            self.theme_combo.addItems(
+                ["Tema oscuro", "Tema claro", "Tema rojo", "Tema azul", "Tema rosa", "Tema marrón"])
+
+        print("ПЕРЕВОД ЗАВЕРШЕН УСПЕШНО!")
+
     def closeEvent(self, event):
+        t = TRANSLATIONS[self.current_lang]
         reply = QMessageBox.question(
-            self, 'Выход', 'Вы уверены, что хотите закрыть Umbra?',
+            self, t["msg_close_title"], t["msg_close_text"],
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply == QMessageBox.StandardButton.Yes:
