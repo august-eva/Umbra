@@ -258,6 +258,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.btn_save_note)
 
         self.btn_delete_note = QPushButton("🗑️Удалить запись")
+        self.btn_delete_note.clicked.connect(self.delete_current_note)
         layout.addWidget(self.btn_delete_note)
 
         self.diary_edit_screen.setLayout(layout)
@@ -296,6 +297,7 @@ class MainWindow(QMainWindow):
         goal_controls.addWidget(self.goal_date)
 
         self.btn_add_goal = QPushButton("🖋 Добавить цель")
+        self.btn_add_goal.clicked.connect(self.save_goal)
         goal_controls.addWidget(self.btn_add_goal)
 
         layout.addLayout(goal_controls)
@@ -307,6 +309,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.goals_table)
 
         self.btn_delete_goal = QPushButton("❗Удалить выбранную цель")
+        self.btn_delete_goal.clicked.connect(self.delete_selected_goal)
         layout.addWidget(self.btn_delete_goal)
 
         self.goals_screen.setLayout(layout)
