@@ -98,6 +98,27 @@ TRANSLATIONS = {
     }
 }
 
+SUPPORT_PHRASES = {
+    "ru": {
+        "Радость": ["Это чудесно! Сохрани это мгновение.", "Продолжай сиять!"],
+        "Грусть": ["Всё проходит, и это пройдет. Ты справишься.", "Ты не одна."],
+        "Вдохновение": ["Лови волну! Ты можешь создать нечто великое.", "Отличный момент, чтобы начать!"],
+        "Злость": ["Выдохни. Твои чувства важны.", "Иногда злость — это топливо для перемен."]
+    },
+    "en": {
+        "Радость": ["This is wonderful! Capture this moment.", "Keep shining!"],
+        "Грусть": ["This too shall pass. You can do it.", "You are not alone."],
+        "Вдохновение": ["Catch the wave! You can create something great.", "A great moment to start!"],
+        "Злость": ["Breathe out. Your feelings matter.", "Sometimes anger is fuel for change."]
+    },
+    "es": {
+        "Радость": ["¡Esto es maravilloso! Captura este momento.", "¡Sigue brillando!"],
+        "Грусть": ["Todo pasa, y esto también. Puedes hacerlo.", "No estás solo."],
+        "Вдохновение": ["¡Atrapa la ola! Puedes crear algo grandioso.", "¡Un gran momento para empezar!"],
+        "Злость": ["Respira. Tus sentimientos importan.", "A veces la ira es combustible para el cambio."]
+    }
+}
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
