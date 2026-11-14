@@ -95,7 +95,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
 
         btn_back = QPushButton("← Назад в меню")
-        btn_back.setFixedWidth(150)
+        btn_back.setFixedWidth(200)
         btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         layout.addWidget(btn_back)
 
@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
 
         btn_cancel = QPushButton("← Отмена")
-        btn_cancel.setFixedWidth(150)
+        btn_cancel.setFixedWidth(200)
         btn_cancel.clicked.connect(lambda: self.stack.setCurrentIndex(1))
         layout.addWidget(btn_cancel)
 
@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
 
         btn_back = QPushButton("← Назад в меню")
-        btn_back.setFixedWidth(150)
+        btn_back.setFixedWidth(200)
         btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         layout.addWidget(btn_back)
 
@@ -205,7 +205,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
 
         btn_back = QPushButton("← Назад в меню")
-        btn_back.setFixedWidth(150)
+        btn_back.setFixedWidth(200)
         btn_back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
         layout.addWidget(btn_back)
 
@@ -227,7 +227,7 @@ class MainWindow(QMainWindow):
         self, self.theme_combo.addItems(
             ["Темная тема", "Светлая тема", "Красная тема", "Синяя тема", "Розовая тема", "Коричневая тема"])
         self.theme_combo.currentIndexChanged.connect(self.change_theme)
-        layout.addWidget(QLabel("Тема офрмления:"))
+        layout.addWidget(QLabel("Тема оформления:"))
         layout.addWidget(self.theme_combo)
 
         layout.addSpacing(20)
@@ -408,60 +408,95 @@ class MainWindow(QMainWindow):
 
     def change_theme(self, index):
         if index == 0:
-            self.setStyleSheet("background-color: #2b2b2b; color: white;")
             self.setWindowIcon(QIcon("resources/icon_dark.png"))
-            menu_img = "resources/bg_menu.png"
-            smoke_img = "resources/bg_smoke.png"
+            menu_img, smoke_img, text_color = "bg_menu.png", "bg_smoke.png", "white"
         elif index == 1:
-            self.setStyleSheet("background-color: #f0f0f0; color: black;")
             self.setWindowIcon(QIcon("resources/icon_light.png"))
-            menu_img = "resources/bg_light_menu.png"
-            smoke_img = "resources/bg_light_smoke.png"
+            menu_img, smoke_img, text_color = "bg_light_menu.png", "bg_light_smoke.png", "black"
         elif index == 2:
-            self.setStyleSheet("background-color: #4a1515; color: #ffcccc;")
             self.setWindowIcon(QIcon("resources/icon_red.png"))
-            menu_img = "resources/bg_red_menu.png"
-            smoke_img = "resources/bg_red_smoke.png"
+            menu_img, smoke_img, text_color = "bg_red_menu.png", "bg_red_smoke.png", "white"
         elif index == 3:
-            self.setStyleSheet("background-color: #1a2a40; color: #d0e0f0;")
             self.setWindowIcon(QIcon("resources/icon_blue.png"))
-            menu_img = "resources/bg_blue_menu.png"
-            smoke_img = "resources/bg_blue_smoke.png"
+            menu_img, smoke_img, text_color = "bg_blue_menu.png", "bg_blue_smoke.png", "white"
         elif index == 4:
-            self.setStyleSheet("background-color: #f4e1e1; color: #4a2c2c;")
             self.setWindowIcon(QIcon("resources/icon_pink.png"))
-            menu_img = "resources/bg_pink_menu.png"
-            smoke_img = "resources/bg_pink_smoke.png"
-        elif index == 5:
-            self.setStyleSheet("background-color: #3e2a20; color: #f0e6d2;")
+            menu_img, smoke_img, text_color = "bg_pink_menu.png", "bg_pink_smoke.png", "black"
+        else:
             self.setWindowIcon(QIcon("resources/icon_brown.png"))
-            menu_img = "resources/bg_brown_menu.png"
-            smoke_img = "resources/bg_brown_smoke.png"
+            menu_img, smoke_img, text_color = "bg_brown_menu.png", "bg_brown_smoke.png", "white"
 
-        self.menu_screen.setAttribute(
-            Qt.WidgetAttribute.WA_StyledBackground, True)
         self.menu_screen.setStyleSheet(f"""
             QWidget {{
-                background-image: url({menu_img});
-                background-position: center;
+                background-image: url(resources/{menu_img});
             }}
         """)
 
-        screens_with_smoke = [
-            self.diary_list_screen,
-            self.diary_edit_screen,
-            self.goals_screen,
-            self.settings_screen
-        ]
-
-        for screen in screens_with_smoke:
-            screen.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        screens = [self.diary_list_screen, self.diary_edit_screen,
+                   self.goals_screen, self.settings_screen]
+        for screen in screens:
             screen.setStyleSheet(f"""
                 QWidget {{
-                    background-image: url({smoke_img});
-                    background-position: center;
+                    background-image: url(resources/{smoke_img});
                 }}
             """)
+
+        global_styles = f"""
+            QLabel {{ 
+                color: {text_color}; 
+                background-color: transparent; 
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 15px;
+            }}
+            QPushButton {{ 
+                background-color: rgba(20, 20, 20, 180); 
+                color: white; 
+                border: 1px solid rgba(255, 255, 255, 60);
+                border-radius: 12px; /* Сильное скругление кнопок */
+                padding: 12px 20px;
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 14px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{ 
+                background-color: rgba(60, 60, 60, 220); /* Светлеет при наведении */
+                border: 1px solid rgba(255, 255, 255, 150);
+            }}
+            QPushButton:pressed {{
+                background-color: rgba(0, 0, 0, 220); /* Темнеет при нажатии */
+            }}
+            QLineEdit, QTextEdit, QComboBox, QListWidget, QTableWidget {{ 
+                background-color: rgba(20, 20, 20, 150); 
+                color: white; 
+                border: 1px solid rgba(255, 255, 255, 50);
+                border-radius: 8px; /* Скругление полей ввода */
+                padding: 8px;
+                font-family: 'Segoe UI', sans-serif;
+            }}
+
+            QComboBox QAbstractItemView {{
+                background-color: #1a1a1a; /* Темный фон списка */
+                color: white;              /* Белый текст пунктов */
+                border: 1px solid rgba(255, 255, 255, 50);
+                selection-background-color: #8b0000; /* Красная подсветка при наведении */
+                selection-color: white;
+            }}
+
+            QMessageBox {{
+                background-color: #2b2b2b; /* Темный фон для окошка */
+            }}
+            QMessageBox QLabel {{
+                color: white; /* Белый текст вопроса */
+            }}
+            QMessageBox QPushButton {{
+                background-color: #444444;
+                color: white;
+                border-radius: 6px;
+                padding: 6px 15px;
+            }}
+        """
+
+        self.setStyleSheet(global_styles)
 
         self.db.set_setting("theme_index", str(index))
 
