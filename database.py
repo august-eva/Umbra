@@ -62,6 +62,7 @@ class DatabaseManager:
             self.connection.rollback()
             print(f"Ошибка при добавлении цели: {e}")
             return False
+# цели
 
     def get_goals(self):
         try:
@@ -71,6 +72,7 @@ class DatabaseManager:
             print(f"Ошибка при получении цели: {e}")
             return []
 
+# записи
     def get_notes(self):
         try:
             self.cursor.execute("SELECT * FROM  notes ORDER BY id  DESC")

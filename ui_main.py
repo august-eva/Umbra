@@ -62,6 +62,7 @@ class MainWindow(QMainWindow):
 
 # Главное меню
 
+
     def setup_menu_screen(self):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -113,7 +114,6 @@ class MainWindow(QMainWindow):
 
 # Дневник
 
-
     def setup_diary_edit_screen(self):
         layout = QVBoxLayout()
 
@@ -159,7 +159,6 @@ class MainWindow(QMainWindow):
 
 
 # Цели
-
 
     def setup_goals_screen(self):
         layout = QVBoxLayout()
@@ -239,6 +238,20 @@ class MainWindow(QMainWindow):
         layout.addStretch()
         self.settings_screen.setLayout(layout)
 
+    def show_support_phrase(self, mood):
+        import random
+        phrases = {
+            "Радость": ["Это чудесно! Сохрани это мгновение.", "Ваша улыбка делает этот мир лучше.", "Продолжай сиять!"],
+            "Грусть": ["Все проходит, и это пройдет. Ты справишься.", "Позволь себе чувствовать. Завтра будет новый день.", "Даже если сейчас темно,рассвет все равно будет."],
+            "Вдохновение": ["Лови волну! Ты можешь создать нечто великое.", "Твоя энергм заразительна, не теряй её.", "Это отличный момент,чтобы начать что-то новое."],
+            "Злость": ["Выдохни. Твои чувства важны, но не дай им управлять собой.", "Иногда злость - это топливо для перемен.", "Сделай глубокий вдох. Ты сильнее всего этого."]
+        }
+
+        selected_phrase = random.choice(
+            phrases.get(mood, ["Твой дневник всегда рядом."]))
+
+        QMessageBox.information(self, "Фраза поддержки", selected_phrase)
+
     def save_note(self):
         title = self.title_input.text().strip()
         text = self.text_edit.toPlainText().strip()
@@ -264,6 +277,7 @@ class MainWindow(QMainWindow):
         self.load_notes()
         self.stack.setCurrentIndex(1)
         QMessageBox.information(self, "Успех", "Запись сохранена в дневник!")
+        self.show_support_phrase(mood)
 
     def load_notes(self):
         self.notes_list.clear()
