@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
     QPushButton, QStackedWidget, QTextEdit, QComboBox, QHBoxLayout, QMessageBox,
     QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem, QFileDialog, QListWidgetItem
 )
-from PyQt6.QtCore import Qt, QDate, QSettings
+from PyQt6.QtCore import Qt, QDate, QSettings, QLocale
 from PyQt6.QtGui import QIcon, QPalette, QBrush, QPixmap, QShortcut, QKeySequence
 from database import DatabaseManager
 
@@ -36,7 +36,11 @@ TRANSLATIONS = {
         "btn_del_note": "🗑️ Удалить запись",
         "btn_new_note": "➕ Создать новую запись",
         "btn_add_goal": "➕ Добавить цель",
-        "btn_del_goal": "🗑️ Удалить выбранную цель"
+        "btn_del_goal": "🗑️ Удалить выбранную цель",
+        "about_title": "О программе",
+        "about_text": "🌒 Umbra (Эстетичный дневник)\n\nВерсия: 1.0\nАвтор: Максимова Софья\n\nПриложение для ведения дневника в стиле Dark Academia.",
+        "support_title": "Поддержка",
+        "support_fallback": "Твой дневник всегда рядом."
     },
     "en": {
         "menu_title": "Welcome to Umbra 🌒",
@@ -65,7 +69,11 @@ TRANSLATIONS = {
         "btn_del_note": "🗑️ Delete note",
         "btn_new_note": "➕ Create new note",
         "btn_add_goal": "➕ Add goal",
-        "btn_del_goal": "🗑️ Delete selected goal"
+        "btn_del_goal": "🗑️ Delete selected goal",
+        "about_title": "About",
+        "about_text": "🌒 Umbra (Aesthetic Diary)\n\nVersion: 1.0\nAuthor: Sofia Maksimova\n\nA diary app in Dark Academia style.",
+        "support_title": "Support",
+        "support_fallback": "Your diary is always here for you."
     },
     "es": {
         "menu_title": "Bienvenido a Umbra 🌒",
@@ -94,7 +102,11 @@ TRANSLATIONS = {
         "btn_del_note": "🗑️ Eliminar nota",
         "btn_new_note": "➕ Crear nueva nota",
         "btn_add_goal": "➕ Añadir meta",
-        "btn_del_goal": "🗑️ Eliminar meta seleccionada"
+        "btn_del_goal": "🗑️ Eliminar meta seleccionada",
+        "about_title": "Acerca de",
+        "about_text": "🌒 Umbra (Diario Estético)\n\nVersión: 1.0\nAutor: Sofia Maksimova\n\nUna aplicación de diario en estilo Dark Academia.",
+        "support_title": "Apoyo",
+        "support_fallback": "Tu diario siempre está aquí para ti."
     }
 }
 
@@ -106,16 +118,18 @@ SUPPORT_PHRASES = {
         "Злость": ["Выдохни. Твои чувства важны.", "Иногда злость — это топливо для перемен."]
     },
     "en": {
-        "Радость": ["This is wonderful! Capture this moment.", "Keep shining!"],
-        "Грусть": ["This too shall pass. You can do it.", "You are not alone."],
-        "Вдохновение": ["Catch the wave! You can create something great.", "A great moment to start!"],
-        "Злость": ["Breathe out. Your feelings matter.", "Sometimes anger is fuel for change."]
+        "Joy": ["This is wonderful! Capture this moment.", "Keep shining!"],
+        "Sadness": ["This too shall pass. You can do it.", "You are not alone."],
+        "Inspiration": ["Catch the wave! You can create something great.", "A great moment to start!"],
+        "Anger": ["Breathe out. Your feelings matter.", "Sometimes anger is fuel for change."]
     },
     "es": {
-        "Радость": ["¡Esto es maravilloso! Captura este momento.", "¡Sigue brillando!"],
-        "Грусть": ["Todo pasa, y esto también. Puedes hacerlo.", "No estás solo."],
-        "Вдохновение": ["¡Atrapa la ola! Puedes crear algo grandioso.", "¡Un gran momento para empezar!"],
-        "Злость": ["Respira. Tus sentimientos importan.", "A veces la ira es combustible para el cambio."]
+        "Alegría": ["¡Esto es maravilloso! Captura este momento.", "¡Sigue brillando!"],
+        "Tristeza": ["Todo pasa, y esto también. Puedes hacerlo.", "No estás solo."],
+        "Inspiración": ["¡Atrapa la ola! Puedes crear algo grandioso.", "¡Un gran momento para empezar!"],
+        "Ira": ["Respira. Tus sentimientos importan.", "A veces la ira es combustible para el cambio."],
+        "support_title": "Apoyo",
+        "support_fallback": "Tu diario siempre está aquí para ti."
     }
 }
 
@@ -172,6 +186,7 @@ class MainWindow(QMainWindow):
 
 
 # Главное меню
+
 
     def setup_menu_screen(self):
         layout = QVBoxLayout()
@@ -230,7 +245,6 @@ class MainWindow(QMainWindow):
 
 # Дневник
 
-
     def setup_diary_edit_screen(self):
         layout = QVBoxLayout()
 
@@ -274,7 +288,6 @@ class MainWindow(QMainWindow):
 
 
 # Цели
-
 
     def setup_goals_screen(self):
         layout = QVBoxLayout()
@@ -360,11 +373,13 @@ class MainWindow(QMainWindow):
 
     def show_support_phrase(self, mood):
         import random
-        lang = self.current_lang
+        lang = getattr(self, 'current_lang', 'ru')
+        t = TRANSLATIONS[lang]
 
-        phrases = SUPPORT_PHRASES[lang].get(mood, ["Дневник всегда рядом."])
+        phrases = SUPPORT_PHRASES[lang].get(mood, [t["support_fallback"]])
         selected_phrase = random.choice(phrases)
-        QMessageBox.information(self, "Поддержка", selected_phrase)
+
+        QMessageBox.information(self, t["support_title"], selected_phrase)
 
     def save_note(self):
         title = self.title_input.text().strip()
@@ -514,11 +529,8 @@ class MainWindow(QMainWindow):
                     self, "Ошибка", f"Не удалось сохранить: {e}")
 
     def show_about(self):
-        QMessageBox.about(self, "О программе Umbra",
-                          "☯ Umbra (Эстетичный дневник)\n\n"
-                          "Версия: 1.0\n"
-                          "Автор: Eva August\n\n"
-                          "Технологии: Python, PyQt6, SQLite3.")
+        t = TRANSLATIONS[self.current_lang]
+        QMessageBox.about(self, t["about_title"], t["about_text"])
 
     def change_theme(self, index):
         print(f"Меняем язык на индекс: {index}")
@@ -609,6 +621,27 @@ class MainWindow(QMainWindow):
                 border-radius: 6px;
                 padding: 6px 15px;
             }}
+            QCalendarWidget QWidget {{
+                background-color: #2b2b2b;
+                color: white;
+            }}
+            QCalendarWidget QAbstractItemView {{
+                background-color: #1e1e1e;
+                color: white;
+                selection-background-color: #8b0000;
+                selection-color: white;
+            }}
+            QCalendarWidget QWidget#qt_calendar_navigationbar {{
+                background-color: #2b2b2b;
+            }}
+            QCalendarWidget QToolButton {{
+                color: white;
+                background-color: transparent;
+            }}
+            QCalendarWidget QSpinBox {{
+                color: white;
+                background-color: #2b2b2b;
+        }}
         """
 
         self.setStyleSheet(global_styles)
@@ -704,6 +737,19 @@ class MainWindow(QMainWindow):
         else:
             self.theme_combo.addItems(
                 ["Tema oscuro", "Tema claro", "Tema rojo", "Tema azul", "Tema rosa", "Tema marrón"])
+
+        if lang == "ru":
+            self.goal_date.setLocale(
+                QLocale(QLocale.Language.Russian, QLocale.Country.Russia))
+            self.goal_date.setDisplayFormat("dd.MM.yyyy")
+        elif lang == "en":
+            self.goal_date.setLocale(
+                QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
+            self.goal_date.setDisplayFormat("MM/dd/yyyy")
+        else:
+            self.goal_date.setLocale(
+                QLocale(QLocale.Language.Spanish, QLocale.Country.Spain))
+            self.goal_date.setDisplayFormat("dd/MM/yyyy")
 
         print("ПЕРЕВОД ЗАВЕРШЕН УСПЕШНО!")
 
