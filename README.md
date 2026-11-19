@@ -50,6 +50,9 @@
    python main.py
    ```
 
+## Скачать готовую программу(без установки Python)
+Исполняемый файл (Windows):  [Umbra_main.exe - Яндекс Диск](https://disk.yandex.ru/d/ZabHLaNVcfYtKQ)
+
 ---
 
 <a id="english"></a>
