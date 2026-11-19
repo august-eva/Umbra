@@ -2,7 +2,7 @@ import sys
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel,
     QPushButton, QStackedWidget, QTextEdit, QComboBox, QHBoxLayout, QMessageBox,
-    QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem, QFileDialog, QListWidgetItem
+    QListWidget, QLineEdit, QDateEdit, QTableWidget, QTableWidgetItem, QFileDialog, QListWidgetItem, QHeaderView, QCheckBox
 )
 from PyQt6.QtCore import Qt, QDate, QSettings, QLocale
 from PyQt6.QtGui import QIcon, QPalette, QBrush, QPixmap, QShortcut, QKeySequence
@@ -25,6 +25,7 @@ TRANSLATIONS = {
         "goal_ph": "Введите название цели...",
         "goal_col1": "Цель",
         "goal_col2": "Дедлайн",
+        "goal_col3": "Выполнено",
         "note_title_ph": "Название записи...",
         "note_text_ph": "Напиши свои мысли здесь...",
         "msg_success": "Успех",
@@ -40,7 +41,9 @@ TRANSLATIONS = {
         "about_title": "О программе",
         "about_text": "🌒 Umbra (Эстетичный дневник)\n\nВерсия: 1.0\nАвтор: Максимова Софья\n\nПриложение для ведения дневника в стиле Dark Academia.",
         "support_title": "Поддержка",
-        "support_fallback": "Твой дневник всегда рядом."
+        "support_fallback": "Твой дневник всегда рядом.",
+        "words": "Слов",
+        "chars": "Символов"
     },
     "en": {
         "menu_title": "Welcome to Umbra 🌒",
@@ -58,6 +61,7 @@ TRANSLATIONS = {
         "goal_ph": "Enter goal name...",
         "goal_col1": "Goal",
         "goal_col2": "Deadline",
+        "goal_col3": "Done",
         "note_title_ph": "Note title...",
         "note_text_ph": "Write your thoughts here...",
         "msg_success": "Success",
@@ -73,7 +77,9 @@ TRANSLATIONS = {
         "about_title": "About",
         "about_text": "🌒 Umbra (Aesthetic Diary)\n\nVersion: 1.0\nAuthor: Sofia Maksimova\n\nA diary app in Dark Academia style.",
         "support_title": "Support",
-        "support_fallback": "Your diary is always here for you."
+        "support_fallback": "Your diary is always here for you.",
+        "words": "Words",
+        "chars": "Characters"
     },
     "es": {
         "menu_title": "Bienvenido a Umbra 🌒",
@@ -91,6 +97,7 @@ TRANSLATIONS = {
         "goal_ph": "Ingrese el nombre de la meta...",
         "goal_col1": "Meta",
         "goal_col2": "Fecha límite",
+        "goal_col3": "Hecho",
         "note_title_ph": "Título de la nota...",
         "note_text_ph": "Escribe tus pensamientos aquí...",
         "msg_success": "Éxito",
@@ -106,7 +113,9 @@ TRANSLATIONS = {
         "about_title": "Acerca de",
         "about_text": "🌒 Umbra (Diario Estético)\n\nVersión: 1.0\nAutor: Sofia Maksimova\n\nUna aplicación de diario en estilo Dark Academia.",
         "support_title": "Apoyo",
-        "support_fallback": "Tu diario siempre está aquí para ti."
+        "support_fallback": "Tu diario siempre está aquí para ti.",
+        "words": "Palabras",
+        "chars": "Caracteres"
     }
 }
 
@@ -131,6 +140,30 @@ SUPPORT_PHRASES = {
         "support_title": "Apoyo",
         "support_fallback": "Tu diario siempre está aquí para ti."
     }
+}
+
+QUOTES = {
+    "ru": [
+        "«Все мы немного безумны» — Эдгар Аллан По",
+        "«Красота в глазах смотрящего» — Оскар Уайльд",
+        "«Тьма — это просто отсутствие света»",
+        "«Книги — это уникальная портативная магия» — Стивен Кинг",
+        "«Я пишу, чтобы понять, о чем думаю»"
+    ],
+    "en": [
+        "\"We are all a little mad\" — Edgar Allan Poe",
+        "\"Beauty is in the eye of the beholder\" — Oscar Wilde",
+        "\"Darkness is merely the absence of light\"",
+        "\"Books are a uniquely portable magic\" — Stephen King",
+        "\"I write to discover what I know\""
+    ],
+    "es": [
+        "\"Todos estamos un poco locos\" — Edgar Allan Poe",
+        "\"La belleza está en los ojos del que mira\" — Oscar Wilde",
+        "\"La oscuridad es simplemente la ausencia de luz\"",
+        "\"Los libros son una magia portátil única\" — Stephen King",
+        "\"Escribo para descubrir lo que sé\""
+    ]
 }
 
 
@@ -184,9 +217,10 @@ class MainWindow(QMainWindow):
         self.theme_combo.setCurrentIndex(int(saved_theme))
         self.change_theme(int(saved_theme))
 
+        self.update_quote()
+
 
 # Главное меню
-
 
     def setup_menu_screen(self):
         layout = QVBoxLayout()
@@ -220,6 +254,12 @@ class MainWindow(QMainWindow):
         self.btn_settings.clicked.connect(
             lambda: self.stack.setCurrentIndex(4))
 
+        self.quote_label = QLabel("")
+        self.quote_label.setStyleSheet(
+            "font_style: italic; color: #aaaaaa: font-size: 14px; margin-bottom: 30px;")
+        self.quote_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.quote_label)
+
     def setup_diary_list_screen(self):
         layout = QVBoxLayout()
 
@@ -245,6 +285,7 @@ class MainWindow(QMainWindow):
 
 # Дневник
 
+
     def setup_diary_edit_screen(self):
         layout = QVBoxLayout()
 
@@ -265,6 +306,11 @@ class MainWindow(QMainWindow):
         self.text_edit = QTextEdit()
         self.text_edit.setPlaceholderText("Напиши свои мысли здесь...")
         layout.addWidget(self.text_edit)
+
+        self.word_count_label = QLabel("Слов: 0 | Символов: 0")
+        self.word_count_label.setStyleSheet("color: gray; font-size: 12px;")
+        layout.addWidget(self.word_count_label)
+        self.text_edit.textChanged.connect(self.update_word_count)
 
         self.btn_save_note = QPushButton("💾 Сохранить запись")
         self.btn_save_note.setFixedHeight(40)
@@ -288,6 +334,7 @@ class MainWindow(QMainWindow):
 
 
 # Цели
+
 
     def setup_goals_screen(self):
         layout = QVBoxLayout()
@@ -316,9 +363,16 @@ class MainWindow(QMainWindow):
         layout.addLayout(goal_controls)
 
         self.goals_table = QTableWidget()
-        self.goals_table.setColumnCount(3)
-        self.goals_table.setHorizontalHeaderLabels(["ID", "Цель", "Дедлайн"])
+        self.goals_table.setColumnCount(4)
+        self.goals_table.setHorizontalHeaderLabels(
+            ["ID", "Цель", "Дедлайн", "Выполнено"])
         self.goals_table.setColumnHidden(0, True)
+        self.goals_table.setEditTriggers(
+            QTableWidget.EditTrigger.NoEditTriggers)
+        self.goals_table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.Stretch)
+        self.goals_table.setColumnWidth(2, 150)
+        self.goals_table.setColumnWidth(3, 100)
         layout.addWidget(self.goals_table)
 
         self.btn_delete_goal = QPushButton("❗Удалить выбранную цель")
@@ -459,28 +513,27 @@ class MainWindow(QMainWindow):
 
     def load_goals(self):
         self.goals_table.setRowCount(0)
-
         goals = self.db.get_goals()
-
-        self.goals_table.setEditTriggers(
-            QTableWidget.EditTrigger.NoEditTriggers)
-        self.goals_table.horizontalHeader().setStretchLastSection(True)
-        self.goals_table.setColumnWidth(1, 250)
 
         for row_number, goal in enumerate(goals):
             self.goals_table.insertRow(row_number)
 
-            goal_id = str(goal[0])
-            goal_text = goal[1]
-            goal_deadline = goal[2]
+            self.goals_table.setItem(
+                row_number, 0, QTableWidgetItem(str(goal[0])))
+            self.goals_table.setItem(row_number, 1, QTableWidgetItem(goal[1]))
+            self.goals_table.setItem(row_number, 2, QTableWidgetItem(goal[2]))
 
-            id_item = QTableWidgetItem(goal_id)
-            text_item = QTableWidgetItem(goal_text)
-            deadline_item = QTableWidgetItem(goal_deadline)
+            checkbox = QCheckBox()
+            checkbox.setStyleSheet(
+                "QCheckBox::indicator { width: 20px; } QCheckBox { margin-left: 40%; }")
 
-            self.goals_table.setItem(row_number, 0, id_item)
-            self.goals_table.setItem(row_number, 1, text_item)
-            self.goals_table.setItem(row_number, 2, deadline_item)
+            status = goal[3] if len(goal) > 3 else '0'
+            if status == '1':
+                checkbox.setChecked(True)
+
+            checkbox.stateChanged.connect(
+                lambda state, g_id=goal[0]: self.save_goal_status_widget(g_id, state))
+            self.goals_table.setCellWidget(row_number, 3, checkbox)
 
     def delete_selected_goal(self):
         current_row = self.goals_table.currentRow()
@@ -705,7 +758,7 @@ class MainWindow(QMainWindow):
 # Цели
         self.goal_input.setPlaceholderText(t["goal_ph"])
         self.goals_table.setHorizontalHeaderLabels(
-            ["ID", t["goal_col1"], t["goal_col2"]]
+            ["ID", t["goal_col1"], t["goal_col2"], t["goal_col3"]]
         )
 
 # Дневник
@@ -751,7 +804,31 @@ class MainWindow(QMainWindow):
                 QLocale(QLocale.Language.Spanish, QLocale.Country.Spain))
             self.goal_date.setDisplayFormat("dd/MM/yyyy")
 
+        self.update_quote()
+        self.update_word_count()
+
         print("ПЕРЕВОД ЗАВЕРШЕН УСПЕШНО!")
+
+    def save_goal_status_widget(self, goal_id, state):
+        if state == 2:
+            self.db.update_goal_status(goal_id, '1')
+        else:
+            self.db.update_goal_status(goal_id, '0')
+
+    def update_word_count(self):
+        text = self.text_edit.toPlainText()
+        chars = len(text)
+        words = len(text.split()) if text.strip() else 0
+        lang = getattr(self, 'current_lang', 'ru')
+        t = TRANSLATIONS[lang]
+        self.word_count_label.setText(
+            f"{t['words']}: {words} | {t['chars']}: {chars}")
+
+    def update_quote(self):
+        import random
+        lang = getattr(self, 'current_lang', 'ru')
+        quote = random.choice(QUOTES[lang])
+        self.quote_label.setText(quote)
 
     def closeEvent(self, event):
         t = TRANSLATIONS[self.current_lang]

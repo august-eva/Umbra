@@ -25,8 +25,9 @@ class DatabaseManager:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             text TEXT NOT NULL,
             deadline TEXT,
+            status TEXT DEFAULT '0', 
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+        );
         """
 
         create_goals_index_query = """
@@ -131,6 +132,14 @@ class DatabaseManager:
             return True
         except sqlite3.Error:
             return False
+
+    def update_goal_status(self, goal_id, status):
+        try:
+            self.cursor.execute(
+                "UPDATE goals SET status=? WHERE id=?", (status, goal_id))
+            self.connection.commit()
+        except sqlite3.Error as e:
+            print(f"Ошибка обновления статуса: {e}")
 
     def close(self):
         if self.connection:
